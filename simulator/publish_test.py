@@ -12,7 +12,7 @@ HIVEMQ_PORT = int(os.getenv("HIVEMQ_PORT", "8883"))
 HIVEMQ_USER = os.getenv("HIVEMQ_USER")
 HIVEMQ_PASSWORD = os.getenv("HIVEMQ_PASSWORD")
 
-TOPIC = "tenant/test/device/test1/telemetry"
+TOPIC = "device/device-001/telemetry"
 
 def on_connect(client, userdata, flags, reason_code, properties=None):
     print("Conectado al broker. Código de resultado:", reason_code)
