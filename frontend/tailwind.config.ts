@@ -11,6 +11,19 @@ export default {
   theme: {
     extend: {
       colors: {
+                // Paleta "Panel de señales"
+        panel: {
+          ink: "#12181B",
+          surface: "#F7F6F2",
+        },
+        brand: {
+          DEFAULT: "#2B6E63",
+          foreground: "#F7F6F2",
+        },
+        live: "#E2A33D",
+        line: "#D8D4C9",
+        muted2: "#5B6663",
+        
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
@@ -56,6 +69,10 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+            fontFamily: {
+        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
+        mono: ["var(--font-geist-mono)", "ui-monospace", "monospace"],
       },
     },
   },

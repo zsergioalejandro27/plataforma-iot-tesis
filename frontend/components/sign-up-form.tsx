@@ -3,13 +3,6 @@
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
@@ -34,7 +27,7 @@ export function SignUpForm({
     setError(null);
 
     if (password !== repeatPassword) {
-      setError("Passwords do not match");
+      setError("Las contraseñas no coinciden");
       setIsLoading(false);
       return;
     }
@@ -58,63 +51,76 @@ export function SignUpForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Sign up</CardTitle>
-          <CardDescription>Create a new account</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSignUp}>
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="repeat-password">Repeat Password</Label>
-                </div>
-                <Input
-                  id="repeat-password"
-                  type="password"
-                  required
-                  value={repeatPassword}
-                  onChange={(e) => setRepeatPassword(e.target.value)}
-                />
-              </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Creating an account..." : "Sign up"}
-              </Button>
-            </div>
-            <div className="mt-4 text-center text-sm">
-              Already have an account?{" "}
-              <Link href="/auth/login" className="underline underline-offset-4">
-                Login
-              </Link>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+      <div>
+        <h1 className="text-2xl font-semibold text-panel-ink">
+          Crea tu cuenta
+        </h1>
+        <p className="mt-1 text-sm text-muted2">
+          Empieza a monitorear tus dispositivos en minutos
+        </p>
+      </div>
+
+      <form onSubmit={handleSignUp}>
+        <div className="flex flex-col gap-5">
+          <div className="grid gap-2">
+            <Label htmlFor="email" className="text-panel-ink">
+              Correo
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="tucorreo@empresa.com"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="border-line bg-white text-panel-ink placeholder:text-muted2"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="password" className="text-panel-ink">
+              Contraseña
+            </Label>
+            <Input
+              id="password"
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="border-line bg-white text-panel-ink placeholder:text-muted2"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="repeat-password" className="text-panel-ink">
+              Repite la contraseña
+            </Label>
+            <Input
+              id="repeat-password"
+              type="password"
+              required
+              value={repeatPassword}
+              onChange={(e) => setRepeatPassword(e.target.value)}
+              className="border-line bg-white text-panel-ink placeholder:text-muted2"
+            />
+          </div>
+          {error && <p className="text-sm text-red-600">{error}</p>}
+          <Button
+            type="submit"
+            className="w-full bg-brand text-brand-foreground hover:bg-brand/90"
+            disabled={isLoading}
+          >
+            {isLoading ? "Creando cuenta..." : "Crear cuenta"}
+          </Button>
+        </div>
+        <div className="mt-4 text-center text-sm text-muted2">
+          ¿Ya tienes una cuenta?{" "}
+          <Link
+            href="/auth/login"
+            className="text-brand underline underline-offset-4"
+          >
+            Inicia sesión
+          </Link>
+        </div>
+      </form>
     </div>
   );
 }

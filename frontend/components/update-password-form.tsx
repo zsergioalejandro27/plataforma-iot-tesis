@@ -3,13 +3,6 @@
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
@@ -33,7 +26,6 @@ export function UpdatePasswordForm({
     try {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
-      // Update this route to redirect to an authenticated route. The user already has an active session.
       router.push("/protected");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
@@ -44,35 +36,41 @@ export function UpdatePasswordForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Reset Your Password</CardTitle>
-          <CardDescription>
-            Please enter your new password below.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleForgotPassword}>
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="password">New password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="New password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Saving..." : "Save new password"}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+      <div>
+        <h1 className="text-2xl font-semibold text-panel-ink">
+          Restablece tu contraseña
+        </h1>
+        <p className="mt-1 text-sm text-muted2">
+          Escribe tu nueva contraseña a continuación
+        </p>
+      </div>
+
+      <form onSubmit={handleForgotPassword}>
+        <div className="flex flex-col gap-5">
+          <div className="grid gap-2">
+            <Label htmlFor="password" className="text-panel-ink">
+              Nueva contraseña
+            </Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="Nueva contraseña"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="border-line bg-white text-panel-ink placeholder:text-muted2"
+            />
+          </div>
+          {error && <p className="text-sm text-red-600">{error}</p>}
+          <Button
+            type="submit"
+            className="w-full bg-brand text-brand-foreground hover:bg-brand/90"
+            disabled={isLoading}
+          >
+            {isLoading ? "Guardando..." : "Guardar nueva contraseña"}
+          </Button>
+        </div>
+      </form>
     </div>
   );
 }
