@@ -29,3 +29,10 @@ export function getDisplayValue(
   const rawValue = metricKey && payloadObject ? payloadObject[metricKey] : undefined;
   return rawValue !== undefined ? `${rawValue}${unit ?? ""}` : "—";
 }
+
+export function getMetricValue(payload: unknown, metricKey: string | null): number | null {
+  const payloadObject = payload as Record<string, unknown> | null | undefined;
+  const rawValue = metricKey && payloadObject ? payloadObject[metricKey] : undefined;
+  const numericValue = typeof rawValue === "number" ? rawValue : Number(rawValue);
+  return rawValue !== undefined && !Number.isNaN(numericValue) ? numericValue : null;
+}

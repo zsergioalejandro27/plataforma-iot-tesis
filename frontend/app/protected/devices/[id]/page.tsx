@@ -1,7 +1,8 @@
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getDisplayValue } from "@/lib/device-status";
+import { getDisplayValue, getMetricValue } from "@/lib/device-status";
+import { TelemetryChart } from "@/components/telemetry-chart";
 
 export default async function DeviceDetailPage({
   params,
@@ -42,6 +43,17 @@ export default async function DeviceDetailPage({
     .order("recorded_at", { ascending: false })
     .limit(50);
 
+  const chartData = (telemetry ?? [])
+    .slice()
+    .reverse()
+    .map((row) => ({
+      time: new Date(row.recorded_at).toLocaleTimeString("es-CO", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      value: getMetricValue(row.payload, device.metric_key) ?? 0,
+    }));
+
   return (
     <div className="rounded-lg border border-line bg-white">
       <div className="border-b border-line p-5">
@@ -59,26 +71,29 @@ export default async function DeviceDetailPage({
           Aún no hay lecturas registradas para este dispositivo.
         </p>
       ) : (
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-line text-left text-muted2">
-              <th className="px-5 py-3 font-medium">Fecha y hora</th>
-              <th className="px-5 py-3 font-medium">Valor</th>
-            </tr>
-          </thead>
-          <tbody>
-            {telemetry.map((row) => (
-              <tr key={row.id} className="border-b border-line last:border-b-0">
-                <td className="px-5 py-3 text-panel-ink">
-                  {new Date(row.recorded_at).toLocaleString("es-CO")}
-                </td>
-                <td className="px-5 py-3 font-mono text-panel-ink">
-                  {getDisplayValue(row.payload, device.metric_key, device.unit)}
-                </td>
+        <>
+          <TelemetryChart data={chartData} unit={device.unit} />
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-line text-left text-muted2">
+                <th className="px-5 py-3 font-medium">Fecha y hora</th>
+                <th className="px-5 py-3 font-medium">Valor</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {telemetry.map((row) => (
+                <tr key={row.id} className="border-b border-line last:border-b-0">
+                  <td className="px-5 py-3 text-panel-ink">
+                    {new Date(row.recorded_at).toLocaleString("es-CO")}
+                  </td>
+                  <td className="px-5 py-3 font-mono text-panel-ink">
+                    {getDisplayValue(row.payload, device.metric_key, device.unit)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
       )}
     </div>
   );
