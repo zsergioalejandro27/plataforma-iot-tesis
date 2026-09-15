@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import time
 import ssl
@@ -12,12 +13,13 @@ HIVEMQ_PORT = int(os.getenv("HIVEMQ_PORT", "8883"))
 HIVEMQ_USER = os.getenv("HIVEMQ_USER")
 HIVEMQ_PASSWORD = os.getenv("HIVEMQ_PASSWORD")
 
-TOPIC = "device/device-001/telemetry"
+DEVICE_KEY = sys.argv[1] if len(sys.argv) > 1 else "device-001"
+TOPIC = f"device/{DEVICE_KEY}/telemetry"
 
 def on_connect(client, userdata, flags, reason_code, properties=None):
     print("Conectado al broker. Código de resultado:", reason_code)
 
-client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id="simulador-test")
+client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=f"simulador-{DEVICE_KEY}")
 client.username_pw_set(HIVEMQ_USER, HIVEMQ_PASSWORD)
 client.tls_set(tls_version=ssl.PROTOCOL_TLS_CLIENT)
 client.on_connect = on_connect
@@ -34,7 +36,7 @@ payload = {
 }
 
 client.publish(TOPIC, json.dumps(payload))
-print("Mensaje publicado:", payload)
+print(f"Mensaje publicado a {TOPIC}:", payload)
 
 time.sleep(1)
 client.loop_stop()

@@ -63,12 +63,11 @@ Diseñar un prototipo de plataforma IoT modular y multi-tenant que gestione disp
 /simulator   → Scripts que simulan dispositivos IoT publicando telemetría por MQTT
 /bridge      → Servicio que se suscribe al broker MQTT y persiste los datos en Supabase
 /frontend    → Aplicación Next.js con los dashboards multi-tenant
-/docs        → Diagramas de arquitectura, decisiones de diseño y documentación técnica
 ```
 
 ## 🚧 Estado del proyecto
 
-Proyecto en construcción activa (Proyecto de Grado I y II, 2026). Consulta `/docs` para el detalle de arquitectura y decisiones tomadas durante el desarrollo.
+Proyecto en construcción activa (Proyecto de Grado I y II, 2026).
 
 ## 📄 Licencia
 

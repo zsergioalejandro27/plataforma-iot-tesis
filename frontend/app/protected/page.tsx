@@ -1,24 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { DeviceRow } from "@/components/device-row";
-
-
-function getDeviceStatus(lastRecordedAt: string | null) {
-  if (!lastRecordedAt) {
-    return { label: "sin datos", colorClass: "bg-line" };
-  }
-
-  const diffMinutes = (Date.now() - new Date(lastRecordedAt).getTime()) / 1000 / 60;
-
-  if (diffMinutes < 10) {
-    return { label: "en línea", colorClass: "bg-brand" };
-  }
-  if (diffMinutes < 60) {
-    return { label: `sin señal hace ${Math.round(diffMinutes)}min`, colorClass: "bg-line" };
-  }
-  const diffHours = Math.round(diffMinutes / 60);
-  return { label: `sin señal hace ${diffHours}h`, colorClass: "bg-line" };
-}
+import { DeviceList } from "@/components/device-list";
 
 export default async function ProtectedPage() {
   const supabase = await createClient();
@@ -63,29 +45,7 @@ export default async function ProtectedPage() {
         <p className="text-sm text-muted2">{tenantName}</p>
       </div>
 
-      {devicesWithTelemetry.length === 0 ? (
-        <p className="p-5 text-sm text-muted2">
-          Aún no tienes dispositivos registrados.
-        </p>
-      ) : (
-        devicesWithTelemetry.map((device) => {
-          const status = getDeviceStatus(device.lastTelemetry?.recorded_at ?? null);
-          const payload = device.lastTelemetry?.payload as Record<string, unknown> | undefined;
-          const rawValue = device.metric_key && payload ? payload[device.metric_key] : undefined;
-          const displayValue = rawValue !== undefined ? `${rawValue}${device.unit ?? ""}` : "—";
-
-          return (
-            <DeviceRow
-              key={device.id}
-              name={device.name}
-              deviceKey={device.device_key}
-              statusLabel={status.label}
-              statusColorClass={status.colorClass}
-              value={displayValue}
-            />
-          );
-        })
-      )}
+      <DeviceList initialDevices={devicesWithTelemetry} />
     </div>
   );
 }
