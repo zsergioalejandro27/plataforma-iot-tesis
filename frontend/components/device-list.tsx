@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { DeviceRow } from "@/components/device-row";
@@ -95,14 +96,19 @@ export function DeviceList({
         );
 
         return (
-          <DeviceRow
+          <Link
             key={device.id}
-            name={device.name}
-            deviceKey={device.device_key}
-            statusLabel={status.label}
-            statusColorClass={status.colorClass}
-            value={displayValue}
-          />
+            href={`/protected/devices/${device.id}`}
+            className="block hover:bg-panel-surface/40"
+          >
+            <DeviceRow
+              name={device.name}
+              deviceKey={device.device_key}
+              statusLabel={status.label}
+              statusColorClass={status.colorClass}
+              value={displayValue}
+            />
+          </Link>
         );
       })}
     </>
