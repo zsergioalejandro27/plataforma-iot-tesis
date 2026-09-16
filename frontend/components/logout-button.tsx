@@ -18,7 +18,7 @@ export function LogoutButton() {
       onClick={logout}
       size="sm"
       variant="outline"
-      className="border-panel-surface/30 text-panel-surface hover:bg-panel-surface/10 hover:text-panel-surface"
+      className="border-panel-surface/30 bg-transparent text-panel-surface hover:bg-panel-surface/10 hover:text-panel-surface"
     >
       Cerrar sesión
     </Button>

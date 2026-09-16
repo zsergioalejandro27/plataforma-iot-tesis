@@ -1,58 +1,58 @@
-import { DeployButton } from "@/components/deploy-button";
-import { EnvVarWarning } from "@/components/env-var-warning";
-import { AuthButton } from "@/components/auth-button";
-import { Hero } from "@/components/hero";
-import { ThemeSwitcher } from "@/components/theme-switcher";
-import { ConnectSupabaseSteps } from "@/components/tutorial/connect-supabase-steps";
-import { SignUpUserSteps } from "@/components/tutorial/sign-up-user-steps";
-import { hasEnvVars } from "@/lib/utils";
 import Link from "next/link";
-import { Suspense } from "react";
+import { Button } from "@/components/ui/button";
+import { EnvVarWarning } from "@/components/env-var-warning";
+import { SignalGraphic } from "@/components/landing/signal-graphic";
+import { HeroPreview } from "@/components/landing/hero-preview";
+import { HowItWorks } from "@/components/landing/how-it-works";
+import { hasEnvVars } from "@/lib/utils";
 
 export default function Home() {
   return (
-    <main className="min-h-screen flex flex-col items-center">
-      <div className="flex-1 w-full flex flex-col gap-20 items-center">
-        <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
-          <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
-            <div className="flex gap-5 items-center font-semibold">
-              <Link href={"/"}>Next.js Supabase Starter</Link>
-              <div className="flex items-center gap-2">
-                <DeployButton />
-              </div>
+    <main className="flex min-h-screen flex-col">
+      <section className="bg-panel-ink px-5 py-16 lg:py-24">
+        <div className="mx-auto flex max-w-5xl flex-col items-center gap-12 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex max-w-lg flex-col gap-6 text-center lg:text-left">
+            <span className="font-mono text-sm text-panel-surface/80">
+              plataforma-iot
+            </span>
+            <h1 className="text-3xl font-semibold leading-tight text-panel-surface lg:text-4xl">
+              Plataforma IoT modular y multi-tenant
+            </h1>
+            <SignalGraphic className="mx-auto h-16 w-full max-w-xs text-live lg:mx-0" />
+            <p className="text-sm leading-relaxed text-panel-surface/90">
+              Conecta dispositivos, procesa sus datos por MQTT y visualízalos
+              en tiempo real — con los datos de cada organización
+              completamente aislados entre sí.
+            </p>
+            <div className="flex justify-center gap-3 lg:justify-start">
+              {hasEnvVars ? (
+                <>
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="border-panel-surface/30 bg-transparent text-panel-surface hover:bg-panel-surface/10 hover:text-panel-surface"
+                  >
+                    <Link href="/auth/login">Iniciar sesión</Link>
+                  </Button>
+                  <Button asChild className="bg-brand text-brand-foreground hover:bg-brand/90">
+                    <Link href="/auth/sign-up">Registrarse</Link>
+                  </Button>
+                </>
+              ) : (
+                <EnvVarWarning />
+              )}
             </div>
-            {!hasEnvVars ? (
-              <EnvVarWarning />
-            ) : (
-              <Suspense>
-                <AuthButton />
-              </Suspense>
-            )}
           </div>
-        </nav>
-        <div className="flex-1 flex flex-col gap-20 max-w-5xl p-5">
-          <Hero />
-          <main className="flex-1 flex flex-col gap-6 px-4">
-            <h2 className="font-medium text-xl mb-4">Next steps</h2>
-            {hasEnvVars ? <SignUpUserSteps /> : <ConnectSupabaseSteps />}
-          </main>
-        </div>
 
-        <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
-          <p>
-            Powered by{" "}
-            <a
-              href="https://supabase.com/?utm_source=create-next-app&utm_medium=template&utm_term=nextjs"
-              target="_blank"
-              className="font-bold hover:underline"
-              rel="noreferrer"
-            >
-              Supabase
-            </a>
-          </p>
-          <ThemeSwitcher />
-        </footer>
-      </div>
+          <HeroPreview />
+        </div>
+      </section>
+
+      <HowItWorks />
+
+      <footer className="border-t border-line bg-panel-surface px-5 py-8 text-center text-xs text-muted2">
+        Plataforma IoT — Proyecto de Grado, Ingeniería de Sistemas, UNAB
+      </footer>
     </main>
   );
 }
