@@ -39,8 +39,7 @@ export function TelemetryChart({
             fontSize={12}
             tickLine={false}
             axisLine={false}
-            width={45}
-            unit={unit ?? ""}
+            width={56}
           />
           <Tooltip
             contentStyle={{

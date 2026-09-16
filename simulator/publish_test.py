@@ -3,6 +3,7 @@ import sys
 import json
 import time
 import ssl
+import random
 import paho.mqtt.client as mqtt
 from dotenv import load_dotenv
 
@@ -30,8 +31,10 @@ client.loop_start()
 time.sleep(1)
 
 payload = {
-    "temperatura": 22.5,
-    "humedad": 60,
+    "temperatura": round(random.uniform(18, 30), 1),
+    "humedad": round(random.uniform(30, 80), 1),
+    "nivel": round(random.uniform(0, 100), 1),
+    "presion": round(random.uniform(990, 1030), 1),
     "timestamp": time.time()
 }
 

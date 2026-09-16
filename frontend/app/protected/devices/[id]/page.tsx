@@ -6,10 +6,13 @@ import { TelemetryChart } from "@/components/telemetry-chart";
 
 export default async function DeviceDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ created?: string }>;
 }) {
   const { id } = await params;
+  const { created } = await searchParams;
   const supabase = await createClient();
 
   const { data: authData, error: authError } = await supabase.auth.getClaims();
@@ -65,6 +68,19 @@ export default async function DeviceDetailPage({
           {device.device_key} · {tenantName}
         </p>
       </div>
+
+      {created === "1" && (
+        <div className="border-b border-line bg-brand/10 p-4 text-sm">
+          <p className="font-medium text-panel-ink">¡Dispositivo creado!</p>
+          <p className="mt-1 text-muted2">
+            Usa esta clave para simularlo:{" "}
+            <code className="font-mono text-panel-ink">{device.device_key}</code>
+          </p>
+          <p className="mt-1 font-mono text-xs text-muted2">
+            py simulator/publish_test.py {device.device_key}
+          </p>
+        </div>
+      )}
 
       {!telemetry || telemetry.length === 0 ? (
         <p className="p-5 text-sm text-muted2">
