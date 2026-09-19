@@ -33,12 +33,15 @@ export default async function PlanPage() {
     .select("id, name")
     .order("created_at", { ascending: true });
 
+  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
   const devicesWithUsage = await Promise.all(
     (devices ?? []).map(async (device) => {
       const { count } = await supabase
         .from("telemetry")
         .select("*", { count: "exact", head: true })
-        .eq("device_id", device.id);
+        .eq("device_id", device.id)
+        .gte("recorded_at", oneDayAgo);
 
       return { ...device, readingsUsed: count ?? 0 };
     }),

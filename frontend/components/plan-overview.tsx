@@ -67,7 +67,7 @@ export function PlanOverview({
         <h1 className="mt-2 text-2xl font-semibold text-panel-ink">Tu plan</h1>
         <p className="mt-1 text-sm text-muted2">
           Cada plan define cuántos dispositivos puedes registrar y cuántas
-          lecturas puede recibir cada uno.
+          lecturas diarias puede recibir cada uno.
         </p>
       </div>
 
@@ -94,7 +94,7 @@ export function PlanOverview({
             <p className="font-semibold text-panel-ink">{plan.name}</p>
             <p className="mt-2 text-sm text-muted2">{plan.max_devices} dispositivos</p>
             <p className="text-sm text-muted2">
-              {plan.max_readings_per_device} lecturas por dispositivo
+              {plan.max_readings_per_device} lecturas diarias por dispositivo
             </p>
             <Button
               className="mt-4 w-full bg-brand text-brand-foreground hover:bg-brand/90"
@@ -116,13 +116,13 @@ export function PlanOverview({
       {devices.length > 0 && currentPlan && (
         <div className="rounded-lg border border-line bg-white">
           <div className="border-b border-line p-4">
-            <p className="font-medium text-panel-ink">Uso por dispositivo</p>
+            <p className="font-medium text-panel-ink">Uso por dispositivo (hoy)</p>
           </div>
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-line text-left text-muted2">
                 <th className="px-4 py-2 font-medium">Dispositivo</th>
-                <th className="px-4 py-2 font-medium">Lecturas usadas</th>
+                <th className="px-4 py-2 font-medium">Lecturas hoy</th>
               </tr>
             </thead>
             <tbody>

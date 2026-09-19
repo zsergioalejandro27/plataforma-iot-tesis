@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getDisplayValue, getMetricValue } from "@/lib/device-status";
 import { TelemetryChart } from "@/components/telemetry-chart";
+import { DeleteDeviceButton } from "@/components/delete-device-button";
 
 export default async function DeviceDetailPage({
   params,
@@ -59,14 +60,17 @@ export default async function DeviceDetailPage({
 
   return (
     <div className="rounded-lg border border-line bg-white">
-      <div className="border-b border-line p-5">
-        <Link href="/protected" className="text-sm text-muted2 hover:text-panel-ink">
-          ← Volver
-        </Link>
-        <h1 className="mt-2 text-xl font-semibold text-panel-ink">{device.name}</h1>
-        <p className="text-sm text-muted2">
-          {device.device_key} · {tenantName}
-        </p>
+      <div className="flex items-start justify-between border-b border-line p-5">
+        <div>
+          <Link href="/protected" className="text-sm text-muted2 hover:text-panel-ink">
+            ← Volver
+          </Link>
+          <h1 className="mt-2 text-xl font-semibold text-panel-ink">{device.name}</h1>
+          <p className="text-sm text-muted2">
+            {device.device_key} · {tenantName}
+          </p>
+        </div>
+        <DeleteDeviceButton deviceId={device.id} deviceName={device.name} />
       </div>
 
       {created === "1" && (

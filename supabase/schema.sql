@@ -121,7 +121,7 @@ create table public.telemetry (
   recorded_at timestamp with time zone default now(),
   constraint telemetry_pkey primary key (id),
   constraint telemetry_tenant_id_fkey foreign key (tenant_id) references public.tenants (id),
-  constraint telemetry_device_id_fkey foreign key (device_id) references public.devices (id)
+  constraint telemetry_device_id_fkey foreign key (device_id) references public.devices (id) on delete cascade
 );
 
 -- ---------------------------------------------------------------------
@@ -164,7 +164,10 @@ create trigger before_insert_device_check_limit
   for each row execute function enforce_device_limit();
 
 -- Bloquea guardar una lectura si ese dispositivo ya llegó al máximo de
--- lecturas permitido por el plan de su tenant.
+-- lecturas DIARIAS permitido por el plan de su tenant. Es una ventana
+-- móvil de 24h (recorded_at >= now() - 1 día) — no borra nada, las
+-- lecturas viejas se quedan para el histórico, solo dejan de contar
+-- para el tope una vez pasan las 24h.
 create or replace function public.enforce_reading_limit()
  returns trigger
  language plpgsql
@@ -175,12 +178,16 @@ declare
   current_count int;
   max_allowed int;
 begin
-  select count(*) into current_count from telemetry where device_id = new.device_id;
+  select count(*) into current_count
+  from telemetry
+  where device_id = new.device_id
+    and recorded_at >= now() - interval '1 day';
+
   select p.max_readings_per_device into max_allowed
     from plans p join tenants t on t.plan_id = p.id where t.id = new.tenant_id;
 
   if current_count >= max_allowed then
-    raise exception 'Límite de lecturas alcanzado para este dispositivo según tu plan (máx. %).', max_allowed;
+    raise exception 'Límite de lecturas diarias alcanzado para este dispositivo según tu plan (máx. % por día).', max_allowed;
   end if;
 
   return new;
@@ -231,6 +238,11 @@ create policy "usuarios crean dispositivos en su tenant"
   on public.devices for insert
   to public
   with check (tenant_id = get_my_tenant_id());
+
+create policy "usuarios eliminan dispositivos de su tenant"
+  on public.devices for delete
+  to public
+  using (tenant_id = get_my_tenant_id());
 
 create policy "usuarios ven telemetria de su tenant"
   on public.telemetry for select
