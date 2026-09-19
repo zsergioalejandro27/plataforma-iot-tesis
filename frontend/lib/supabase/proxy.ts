@@ -59,6 +59,30 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Si el usuario nunca ha elegido un plan para su tenant, lo mandamos a
+  // /protected/plan antes de dejarlo ver cualquier otra página protegida.
+  if (
+    user &&
+    request.nextUrl.pathname.startsWith("/protected") &&
+    request.nextUrl.pathname !== "/protected/plan"
+  ) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("tenants(plan_selected)")
+      .eq("id", user.sub as string)
+      .single();
+
+    const planSelected = (
+      profile?.tenants as { plan_selected?: boolean } | null
+    )?.plan_selected;
+
+    if (planSelected === false) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/protected/plan";
+      return NextResponse.redirect(url);
+    }
+  }
+
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
   // If you're creating a new response object with NextResponse.next() make sure to:
   // 1. Pass the request in it, like so:

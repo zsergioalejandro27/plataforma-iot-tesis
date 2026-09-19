@@ -62,11 +62,30 @@ $function$;
 -- Tablas
 -- ---------------------------------------------------------------------
 
+-- Catálogo fijo de planes — define cuántos dispositivos puede tener un
+-- tenant y cuántas lecturas puede recibir cada dispositivo. No son pagos
+-- reales, es para demostrar el concepto de límites diferenciados por plan.
+create table public.plans (
+  id text not null,
+  name text not null,
+  max_devices int not null,
+  max_readings_per_device int not null,
+  constraint plans_pkey primary key (id)
+);
+
+insert into public.plans (id, name, max_devices, max_readings_per_device) values
+  ('basico', 'Básico', 3, 10),
+  ('medio', 'Medio', 5, 25),
+  ('pro', 'Pro', 10, 50);
+
 create table public.tenants (
   id uuid not null default gen_random_uuid(),
   name text not null,
+  plan_id text not null default 'basico',
+  plan_selected boolean not null default false,
   created_at timestamp with time zone default now(),
-  constraint tenants_pkey primary key (id)
+  constraint tenants_pkey primary key (id),
+  constraint tenants_plan_id_fkey foreign key (plan_id) references public.plans (id)
 );
 
 create table public.profiles (
@@ -114,18 +133,89 @@ create trigger on_auth_user_created
   for each row execute function handle_new_user();
 
 -- ---------------------------------------------------------------------
+-- Triggers de límites de plan
+-- ---------------------------------------------------------------------
+
+-- Bloquea crear un dispositivo si el tenant ya llegó al máximo de su plan.
+create or replace function public.enforce_device_limit()
+ returns trigger
+ language plpgsql
+ security definer
+ set search_path to 'public'
+as $function$
+declare
+  current_count int;
+  max_allowed int;
+begin
+  select count(*) into current_count from devices where tenant_id = new.tenant_id;
+  select p.max_devices into max_allowed
+    from plans p join tenants t on t.plan_id = p.id where t.id = new.tenant_id;
+
+  if current_count >= max_allowed then
+    raise exception 'Límite de dispositivos alcanzado para tu plan (máx. %).', max_allowed;
+  end if;
+
+  return new;
+end;
+$function$;
+
+create trigger before_insert_device_check_limit
+  before insert on public.devices
+  for each row execute function enforce_device_limit();
+
+-- Bloquea guardar una lectura si ese dispositivo ya llegó al máximo de
+-- lecturas permitido por el plan de su tenant.
+create or replace function public.enforce_reading_limit()
+ returns trigger
+ language plpgsql
+ security definer
+ set search_path to 'public'
+as $function$
+declare
+  current_count int;
+  max_allowed int;
+begin
+  select count(*) into current_count from telemetry where device_id = new.device_id;
+  select p.max_readings_per_device into max_allowed
+    from plans p join tenants t on t.plan_id = p.id where t.id = new.tenant_id;
+
+  if current_count >= max_allowed then
+    raise exception 'Límite de lecturas alcanzado para este dispositivo según tu plan (máx. %).', max_allowed;
+  end if;
+
+  return new;
+end;
+$function$;
+
+create trigger before_insert_telemetry_check_limit
+  before insert on public.telemetry
+  for each row execute function enforce_reading_limit();
+
+-- ---------------------------------------------------------------------
 -- Row Level Security
 -- ---------------------------------------------------------------------
 
+alter table public.plans enable row level security;
 alter table public.tenants enable row level security;
 alter table public.profiles enable row level security;
 alter table public.devices enable row level security;
 alter table public.telemetry enable row level security;
 
+create policy "cualquiera puede ver los planes"
+  on public.plans for select
+  to public
+  using (true);
+
 create policy "usuarios ven su propio tenant"
   on public.tenants for select
   to public
   using (id = get_my_tenant_id());
+
+create policy "usuarios actualizan su propio tenant"
+  on public.tenants for update
+  to public
+  using (id = get_my_tenant_id())
+  with check (id = get_my_tenant_id());
 
 create policy "usuarios ven su propio perfil"
   on public.profiles for select

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -63,7 +64,10 @@ export function NewDeviceForm() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold text-panel-ink">
+        <Link href="/protected" className="text-sm text-muted2 hover:text-panel-ink">
+          ← Volver
+        </Link>
+        <h1 className="mt-2 text-2xl font-semibold text-panel-ink">
           Agregar dispositivo
         </h1>
         <p className="mt-1 text-sm text-muted2">
