@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { METRIC_CATALOG } from "@/lib/metric-catalog";
 
 function generateDeviceKey() {
   const suffix = Math.random().toString(36).slice(2, 8);
@@ -15,8 +16,7 @@ function generateDeviceKey() {
 
 export function NewDeviceForm() {
   const [name, setName] = useState("");
-  const [metricKey, setMetricKey] = useState("");
-  const [unit, setUnit] = useState("");
+  const [metricKey, setMetricKey] = useState(METRIC_CATALOG[0].key);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -29,6 +29,9 @@ export function NewDeviceForm() {
 
     let lastError: string | null = "No se pudo crear el dispositivo";
 
+    const selectedMetric =
+      METRIC_CATALOG.find((m) => m.key === metricKey) ?? METRIC_CATALOG[0];
+
     // Reintenta unas pocas veces por si el device_key generado ya existe
     // (choca con la restricción UNIQUE) — muy poco probable, pero posible.
     for (let attempt = 0; attempt < 5; attempt++) {
@@ -36,8 +39,8 @@ export function NewDeviceForm() {
         .from("devices")
         .insert({
           name,
-          metric_key: metricKey || null,
-          unit: unit || null,
+          metric_key: selectedMetric.key,
+          unit: selectedMetric.unit,
           device_key: generateDeviceKey(),
         })
         .select("id")
@@ -94,30 +97,23 @@ export function NewDeviceForm() {
             <Label htmlFor="metric_key" className="text-panel-ink">
               Métrica
             </Label>
-            <Input
+            <select
               id="metric_key"
-              placeholder="temperatura, humedad, nivel, presion..."
               required
               value={metricKey}
               onChange={(e) => setMetricKey(e.target.value)}
-              className="border-line bg-white text-panel-ink placeholder:text-muted2"
-            />
+              className="flex h-9 w-full rounded-md border border-line bg-white px-3 py-1 text-base text-panel-ink shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring md:text-sm"
+            >
+              {METRIC_CATALOG.map((metric) => (
+                <option key={metric.key} value={metric.key}>
+                  {metric.label} ({metric.unit})
+                </option>
+              ))}
+            </select>
             <p className="text-xs text-muted2">
-              El nombre del campo dentro del payload MQTT que quieres mostrar
-              en el dashboard.
+              La unidad queda fijada automáticamente según la métrica que
+              elijas.
             </p>
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="unit" className="text-panel-ink">
-              Unidad
-            </Label>
-            <Input
-              id="unit"
-              placeholder="°C, %, hPa..."
-              value={unit}
-              onChange={(e) => setUnit(e.target.value)}
-              className="border-line bg-white text-panel-ink placeholder:text-muted2"
-            />
           </div>
           {error && <p className="text-sm text-red-600">{error}</p>}
           <Button
