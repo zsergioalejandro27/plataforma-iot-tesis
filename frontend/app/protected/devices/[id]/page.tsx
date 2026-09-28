@@ -54,6 +54,7 @@ export default async function DeviceDetailPage({
       time: new Date(row.recorded_at).toLocaleTimeString("es-CO", {
         hour: "2-digit",
         minute: "2-digit",
+        timeZone: "America/Bogota",
       }),
       value: getMetricValue(row.payload, device.metric_key) ?? 0,
     }));
@@ -104,7 +105,9 @@ export default async function DeviceDetailPage({
               {telemetry.map((row) => (
                 <tr key={row.id} className="border-b border-line last:border-b-0">
                   <td className="px-5 py-3 text-panel-ink">
-                    {new Date(row.recorded_at).toLocaleString("es-CO")}
+                    {new Date(row.recorded_at).toLocaleString("es-CO", {
+                      timeZone: "America/Bogota",
+                    })}
                   </td>
                   <td className="px-5 py-3 font-mono text-panel-ink">
                     {getDisplayValue(row.payload, device.metric_key, device.unit)}
