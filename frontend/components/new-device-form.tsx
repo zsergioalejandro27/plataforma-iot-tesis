@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -14,12 +14,35 @@ function generateDeviceKey() {
   return `device-${suffix}`;
 }
 
+const NAME_SUGGESTIONS = [
+  "Sensor Temperatura Norte",
+  "Nodo Ambiental 01",
+  "Estación Meteorológica A",
+  "Monitor de Tanque Principal",
+  "Sensor Exterior Patio",
+  "Nodo Bodega 3",
+  "Sensor Sala de Servidores",
+  "Estación Jardín",
+  "Monitor Invernadero 1",
+  "Sensor Línea de Producción",
+];
+
 export function NewDeviceForm() {
   const [name, setName] = useState("");
+  const [namePlaceholder, setNamePlaceholder] = useState(NAME_SUGGESTIONS[0]);
   const [metricKey, setMetricKey] = useState(METRIC_CATALOG[0].key);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+
+  // Se elige al azar solo después de montar en el navegador, para que
+  // el HTML del servidor y el del cliente coincidan al hidratar (si se
+  // eligiera al azar durante el render, servidor y cliente podrían
+  // elegir nombres distintos y React marcaría un error de hidratación).
+  useEffect(() => {
+    const random = NAME_SUGGESTIONS[Math.floor(Math.random() * NAME_SUGGESTIONS.length)];
+    setNamePlaceholder(random);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,7 +109,7 @@ export function NewDeviceForm() {
             </Label>
             <Input
               id="name"
-              placeholder="Sensor Temperatura 2"
+              placeholder={namePlaceholder}
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
