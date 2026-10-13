@@ -32,6 +32,7 @@ Dispositivos/simulador --MQTT--> HiveMQ Cloud --MQTT--> bridge.py --> Supabase (
 - `app/protected/plan`: planes y uso diario.
 - `lib/supabase/proxy.ts` + `proxy.ts` (en Next 16 "middleware" se llama proxy): refresca la sesión y manda a `/protected/plan` a los tenants con `plan_selected = false`.
 - `lib/metric-catalog.ts`: catálogo de 10 métricas con su unidad fija.
+- `components/device-connect.tsx` + `lib/device-scripts.ts`: tarjeta "Conectar este dispositivo" del detalle (`devices/[id]`). Muestra la URL y el token, y genera/descarga un gemelo digital en Python, un sketch para ESP32 y un ejemplo cURL con el token y la métrica ya puestos (rangos en `lib/metric-catalog.ts`, iguales a `simulator/payload_generator.py`). "Regenerar token" llama a la función SQL `regenerate_device_token` (los usuarios no tienen UPDATE sobre `devices`). La URL de los scripts sale de `window.location.origin`.
 - `app/api/ingest/route.ts`: puerta HTTP para dispositivos y scripts externos (alternativa al MQTT). `POST` con `Authorization: Bearer <devices.api_token>` y un JSON con el campo de la métrica del dispositivo (ej. `{"temperatura": 22.5}`). Responde 201, 401 (token ausente o inválido, mismo mensaje), 400 (JSON o métrica inválidos), 413 (más de 2 KB) y 429 (límite diario del plan, viene del trigger). Usa `lib/supabase/admin.ts` (llave de servicio, solo servidor).
 
 ## Modelo de datos
@@ -70,7 +71,7 @@ py simulator/publish_test.py device-001   # una lectura de prueba (Windows)
 
 ## Pendientes conocidos
 
-- Fase 3 de la línea educativa (aprobada): mostrar el `api_token` en el detalle del dispositivo y en "¡Dispositivo creado!", botón que descarga scripts de simulación (Python y Arduino/ESP32) con el token y la métrica ya puestos, y botón "regenerar token".
+- Probar el sketch de ESP32 (`.ino`) en Wokwi y anotar el resultado; está generado y revisado a ojo, no probado en hardware.
 - Cambiar el nombre en las plantillas de correo de Supabase Auth (Authentication → Emails) junto con el dominio y el SMTP propios.
 - Validación formal (pruebas funcionales con prueba real de aislamiento entre dos tenants, rendimiento con latencia medida, usabilidad con usuarios reales) y su documentación.
 - Decidir cómo darle a un cliente externo un script de simulación sin compartir la credencial maestra de HiveMQ (HiveMQ Cloud permite credenciales con permiso por topic).

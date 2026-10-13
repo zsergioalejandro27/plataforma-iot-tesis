@@ -202,6 +202,38 @@ create trigger before_insert_telemetry_check_limit
   before insert on public.telemetry
   for each row execute function enforce_reading_limit();
 
+-- Regenera el token secreto de un dispositivo (botón "Regenerar token" de la
+-- tarjeta "Conectar este dispositivo"). Es una función y no un UPDATE directo
+-- porque los usuarios no tienen política de UPDATE sobre devices: así no
+-- pueden poner un token a mano (por ejemplo uno débil), solo recibir uno
+-- aleatorio, y únicamente de dispositivos de su propio tenant.
+create or replace function public.regenerate_device_token(p_device_id uuid)
+ returns text
+ language plpgsql
+ security definer
+ set search_path to 'public'
+as $function$
+declare
+  new_token text;
+begin
+  new_token := replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', '');
+
+  update devices
+     set api_token = new_token
+   where id = p_device_id
+     and tenant_id = get_my_tenant_id();
+
+  if not found then
+    raise exception 'Dispositivo no encontrado';
+  end if;
+
+  return new_token;
+end;
+$function$;
+
+revoke execute on function public.regenerate_device_token(uuid) from public, anon;
+grant execute on function public.regenerate_device_token(uuid) to authenticated;
+
 -- ---------------------------------------------------------------------
 -- Row Level Security
 -- ---------------------------------------------------------------------

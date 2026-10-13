@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getDisplayValue, getMetricValue } from "@/lib/device-status";
 import { TelemetryChart } from "@/components/telemetry-chart";
 import { DeleteDeviceButton } from "@/components/delete-device-button";
+import { DeviceConnect } from "@/components/device-connect";
 
 export default async function DeviceDetailPage({
   params,
@@ -24,15 +25,20 @@ export default async function DeviceDetailPage({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("tenants(name)")
+    .select("tenants(name, plans(max_readings_per_device))")
     .eq("id", userId)
     .single();
 
-  const tenantName = (profile?.tenants as { name?: string } | null)?.name ?? "Tu organización";
+  const tenant = profile?.tenants as {
+    name?: string;
+    plans?: { max_readings_per_device?: number } | null;
+  } | null;
+  const tenantName = tenant?.name ?? "Tu organización";
+  const maxPerDay = tenant?.plans?.max_readings_per_device ?? null;
 
   const { data: device } = await supabase
     .from("devices")
-    .select("id, name, device_key, metric_key, unit")
+    .select("id, name, device_key, metric_key, unit, api_token")
     .eq("id", id)
     .single();
 
@@ -105,18 +111,16 @@ export default async function DeviceDetailPage({
         <DeleteDeviceButton deviceId={device.id} deviceName={device.name} />
       </div>
 
-      {created === "1" && (
-        <div className="border-b border-line bg-brand/10 p-4 text-sm">
-          <p className="font-medium text-panel-ink">¡Dispositivo creado!</p>
-          <p className="mt-1 text-muted2">
-            Usa esta clave para simularlo:{" "}
-            <code className="font-mono text-panel-ink">{device.device_key}</code>
-          </p>
-          <p className="mt-1 font-mono text-xs text-muted2">
-            py simulator/publish_test.py {device.device_key}
-          </p>
-        </div>
-      )}
+      <DeviceConnect
+        deviceId={device.id}
+        deviceName={device.name}
+        deviceKey={device.device_key}
+        metricKey={device.metric_key}
+        unit={device.unit}
+        initialToken={device.api_token}
+        maxPerDay={maxPerDay}
+        justCreated={created === "1"}
+      />
 
       {!telemetry || telemetry.length === 0 ? (
         <p className="p-5 text-sm text-muted2">
