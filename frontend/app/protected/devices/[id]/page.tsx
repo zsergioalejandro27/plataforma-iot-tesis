@@ -47,17 +47,48 @@ export default async function DeviceDetailPage({
     .order("recorded_at", { ascending: false })
     .limit(200);
 
+  // Todo se formatea con timeZone explícito: este código corre en el servidor
+  // de Vercel (UTC), no en el navegador de Bogotá.
+  const TZ = "America/Bogota";
   const chartData = (telemetry ?? [])
     .slice()
     .reverse()
-    .map((row) => ({
-      time: new Date(row.recorded_at).toLocaleTimeString("es-CO", {
-        hour: "2-digit",
-        minute: "2-digit",
-        timeZone: "America/Bogota",
-      }),
-      value: getMetricValue(row.payload, device.metric_key) ?? 0,
-    }));
+    .map((row) => {
+      const date = new Date(row.recorded_at);
+      const parts = new Intl.DateTimeFormat("es-CO", {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+        timeZone: TZ,
+      }).formatToParts(date);
+      const part = (type: string) =>
+        (parts.find((p) => p.type === type)?.value ?? "").replace(".", "");
+
+      return {
+        key: `${row.id}`,
+        // "2:38 p. m." -> "2:38 pm", más corto para el eje
+        time: date
+          .toLocaleTimeString("es-CO", {
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+            timeZone: TZ,
+          })
+          .replace(/\s*([ap])\.\s*m\./i, " $1m"),
+        // "2026-10-14": sirve para detectar en qué punto cambia el día
+        day: date.toLocaleDateString("en-CA", { timeZone: TZ }),
+        dayLabel: `${part("weekday")} ${part("day")} ${part("month")}`,
+        full: date.toLocaleString("es-CO", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          hour: "numeric",
+          minute: "2-digit",
+          timeZone: TZ,
+        }),
+        value: getMetricValue(row.payload, device.metric_key) ?? 0,
+      };
+    });
 
   return (
     <div className="rounded-lg border border-line bg-white">
