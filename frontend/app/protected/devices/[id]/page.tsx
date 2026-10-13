@@ -45,7 +45,7 @@ export default async function DeviceDetailPage({
     .select("id, payload, recorded_at")
     .eq("device_id", device.id)
     .order("recorded_at", { ascending: false })
-    .limit(50);
+    .limit(200);
 
   const chartData = (telemetry ?? [])
     .slice()
@@ -102,7 +102,7 @@ export default async function DeviceDetailPage({
               </tr>
             </thead>
             <tbody>
-              {telemetry.map((row) => (
+              {telemetry.slice(0, 50).map((row) => (
                 <tr key={row.id} className="border-b border-line last:border-b-0">
                   <td className="px-5 py-3 text-panel-ink">
                     {new Date(row.recorded_at).toLocaleString("es-CO", {

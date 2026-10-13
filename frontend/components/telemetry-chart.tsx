@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ComposedChart,
   Line,
@@ -20,6 +20,10 @@ export type TelemetryPoint = {
 
 type ChartType = "line" | "bar" | "scatter";
 
+// Ancho mínimo que se le reserva a cada lectura. Si no cabe en el contenedor,
+// la gráfica se ensancha y aparece scroll horizontal en vez de apretarse.
+const PX_PER_POINT = 48;
+
 const CHART_OPTIONS: { type: ChartType; label: string }[] = [
   { type: "line", label: "Línea" },
   { type: "bar", label: "Barras" },
@@ -34,6 +38,15 @@ export function TelemetryChart({
   unit: string | null;
 }) {
   const [chartType, setChartType] = useState<ChartType>("line");
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Al cargar (o al llegar lecturas nuevas) el scroll va al extremo derecho,
+  // donde están las lecturas más recientes. Se hace en un efecto porque
+  // necesita el DOM ya montado.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollLeft = el.scrollWidth;
+  }, [data.length, chartType]);
 
   return (
     <div className="border-b border-line p-5">
@@ -54,6 +67,8 @@ export function TelemetryChart({
         ))}
       </div>
 
+      <div ref={scrollRef} className="overflow-x-auto">
+      <div style={{ minWidth: data.length * PX_PER_POINT }}>
       <ResponsiveContainer width="100%" height={220}>
         <ComposedChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
           <CartesianGrid stroke="#D8D4C9" strokeDasharray="3 3" vertical={false} />
@@ -100,9 +115,18 @@ export function TelemetryChart({
               radius={[4, 4, 0, 0]}
             />
           )}
-          {chartType === "scatter" && <Scatter dataKey="value" fill="#2B6E63" />}
+          {chartType === "scatter" && (
+            <Scatter
+              dataKey="value"
+              fill="#2B6E63"
+              line={{ stroke: "#2B6E63", strokeWidth: 1 }}
+              lineType="joint"
+            />
+          )}
         </ComposedChart>
       </ResponsiveContainer>
+      </div>
+      </div>
     </div>
   );
 }
