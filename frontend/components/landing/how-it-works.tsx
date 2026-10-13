@@ -1,3 +1,5 @@
+import { BrokerTemple } from "@/components/landing/broker-temple";
+
 const steps = [
   {
     title: "Dispositivos",
@@ -25,6 +27,7 @@ export function HowItWorks() {
   return (
     <section className="bg-panel-surface px-5 py-20">
       <div className="mx-auto max-w-5xl">
+        <BrokerTemple className="mx-auto mb-5 h-24 text-panel-ink" />
         <h2 className="text-center text-2xl font-semibold text-panel-ink">
           Cómo funciona
         </h2>

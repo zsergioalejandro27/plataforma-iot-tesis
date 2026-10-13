@@ -1,5 +1,6 @@
 import { AuthButton } from "@/components/auth-button";
 import { EnvVarWarning } from "@/components/env-var-warning";
+import { SemaLogo } from "@/components/sema-logo";
 import { hasEnvVars } from "@/lib/utils";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -14,8 +15,8 @@ export default function ProtectedLayout({
       <nav className="w-full bg-panel-ink">
         <div className="w-full max-w-5xl mx-auto flex justify-between items-center p-4 px-5">
           <div className="flex items-center gap-5">
-            <Link href="/protected" className="font-mono text-sm text-panel-surface">
-              plataforma-iot
+            <Link href="/protected" aria-label="Sema, inicio" className="flex items-center">
+              <SemaLogo variant="compact" />
             </Link>
             <Link
               href="/protected/plan"

@@ -66,3 +66,47 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Animación de "dibujado" del logo y de la línea de señal al cargar la página.
+   Los elementos usan pathLength={1}, así que el trazo completo mide 1 y se
+   anima el stroke-dashoffset de 1 a 0. */
+@keyframes sema-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes sema-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.sema-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: sema-draw var(--sema-draw-duration, 1s) ease-out
+    var(--sema-draw-delay, 0s) forwards;
+}
+
+.sema-fade {
+  opacity: 0;
+  animation: sema-fade 0.4s ease-out var(--sema-fade-delay, 0s) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sema-draw {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+  .sema-fade {
+    animation: none;
+    opacity: 1;
+  }
+}

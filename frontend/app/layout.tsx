@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Cinzel, Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
 
@@ -9,7 +9,7 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "Plataforma IoT",
+  title: "Sema · Central de IoT",
   description: "Plataforma IoT modular y multi-tenant — Proyecto de Grado UNAB",
 };
 
@@ -25,14 +25,22 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Solo se usa en la palabra SEMA del logo (components/sema-logo.tsx).
+const cinzel = Cinzel({
+  variable: "--font-cinzel",
+  display: "swap",
+  subsets: ["latin"],
+  weight: ["600"],
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
+    <html lang="es" suppressHydrationWarning>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${cinzel.variable} font-sans antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

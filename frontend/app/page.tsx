@@ -4,6 +4,7 @@ import { EnvVarWarning } from "@/components/env-var-warning";
 import { SignalGraphic } from "@/components/landing/signal-graphic";
 import { HeroPreview } from "@/components/landing/hero-preview";
 import { HowItWorks } from "@/components/landing/how-it-works";
+import { SemaLogo } from "@/components/sema-logo";
 import { hasEnvVars } from "@/lib/utils";
 
 export default function Home() {
@@ -12,9 +13,7 @@ export default function Home() {
       <section className="bg-panel-ink px-5 py-16 lg:py-24">
         <div className="mx-auto flex max-w-5xl flex-col items-center gap-12 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex max-w-lg flex-col gap-6 text-center lg:text-left">
-            <span className="font-mono text-sm text-panel-surface/80">
-              plataforma-iot
-            </span>
+            <SemaLogo className="mx-auto lg:mx-0" />
             <h1 className="text-3xl font-semibold leading-tight text-panel-surface lg:text-4xl">
               Plataforma IoT modular y multi-tenant
             </h1>
@@ -51,7 +50,7 @@ export default function Home() {
       <HowItWorks />
 
       <footer className="border-t border-line bg-panel-surface px-5 py-8 text-center text-xs text-muted2">
-        Plataforma IoT — Proyecto de Grado, Ingeniería de Sistemas, UNAB
+        Sema · Central de IoT — Proyecto de Grado, Ingeniería de Sistemas, UNAB
       </footer>
     </main>
   );
