@@ -111,6 +111,10 @@ create table public.devices (
   -- Token secreto por dispositivo para la puerta HTTP (/api/ingest). Lo ve
   -- solo el tenant dueño (RLS de devices). 64 caracteres hex aleatorios.
   api_token text not null default replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', ''),
+  -- Si es true, el publicador automático de AWS (simulator/auto_publisher.py)
+  -- le envía lecturas simuladas periódicamente. El dueño lo apaga desde la
+  -- tarjeta "Conectar este dispositivo" para recibir solo sus propios datos.
+  cloud_simulation boolean not null default true,
   constraint devices_pkey primary key (id),
   constraint devices_device_key_key unique (device_key),
   constraint devices_api_token_key unique (api_token),
@@ -233,6 +237,32 @@ $function$;
 
 revoke execute on function public.regenerate_device_token(uuid) from public, anon;
 grant execute on function public.regenerate_device_token(uuid) to authenticated;
+
+-- Activa o desactiva la simulación en la nube de un dispositivo (interruptor
+-- de la tarjeta "Conectar este dispositivo"). Misma razón que arriba: es una
+-- función y no un UPDATE directo, y solo afecta dispositivos del propio tenant.
+create or replace function public.set_cloud_simulation(p_device_id uuid, p_enabled boolean)
+ returns boolean
+ language plpgsql
+ security definer
+ set search_path to 'public'
+as $function$
+begin
+  update devices
+     set cloud_simulation = p_enabled
+   where id = p_device_id
+     and tenant_id = get_my_tenant_id();
+
+  if not found then
+    raise exception 'Dispositivo no encontrado';
+  end if;
+
+  return p_enabled;
+end;
+$function$;
+
+revoke execute on function public.set_cloud_simulation(uuid, boolean) from public, anon;
+grant execute on function public.set_cloud_simulation(uuid, boolean) to authenticated;
 
 -- ---------------------------------------------------------------------
 -- Row Level Security

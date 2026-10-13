@@ -38,7 +38,7 @@ export default async function DeviceDetailPage({
 
   const { data: device } = await supabase
     .from("devices")
-    .select("id, name, device_key, metric_key, unit, api_token")
+    .select("id, name, device_key, metric_key, unit, api_token, cloud_simulation")
     .eq("id", id)
     .single();
 
@@ -118,6 +118,7 @@ export default async function DeviceDetailPage({
         metricKey={device.metric_key}
         unit={device.unit}
         initialToken={device.api_token}
+        initialCloudSimulation={device.cloud_simulation}
         maxPerDay={maxPerDay}
         justCreated={created === "1"}
       />

@@ -43,12 +43,20 @@ try:
     while True:
         # Se vuelve a consultar la lista de dispositivos en CADA ronda,
         # para detectar automáticamente cualquier dispositivo creado
-        # después de que este script arrancó.
-        result = supabase.table("devices").select("device_key").execute()
+        # después de que este script arrancó. Solo se incluyen los que tienen
+        # activada la "simulación en la nube" (interruptor de la tarjeta
+        # "Conectar este dispositivo"): los demás reciben únicamente las
+        # lecturas que su dueño envía con su propio script o sensor.
+        result = (
+            supabase.table("devices")
+            .select("device_key")
+            .eq("cloud_simulation", True)
+            .execute()
+        )
         devices = result.data or []
 
         if not devices:
-            print("No hay dispositivos registrados todavía.")
+            print("No hay dispositivos con simulación en la nube activada.")
         else:
             for device in devices:
                 device_key = device["device_key"]

@@ -40,6 +40,10 @@ const STEPS: Record<Tab, string[]> = {
 
 const MASKED_TOKEN = "••••••••••••••••••••••••";
 
+// Frecuencia del publicador automático de AWS (PUBLISH_INTERVAL_SECONDS en su
+// servicio systemd; hoy 3600 s). Si se cambia allá, actualizar este texto.
+const CLOUD_SIM_EVERY = "cada hora";
+
 export function DeviceConnect({
   deviceId,
   deviceName,
@@ -47,6 +51,7 @@ export function DeviceConnect({
   metricKey,
   unit,
   initialToken,
+  initialCloudSimulation,
   maxPerDay,
   justCreated,
 }: {
@@ -56,10 +61,13 @@ export function DeviceConnect({
   metricKey: string | null;
   unit: string | null;
   initialToken: string;
+  initialCloudSimulation: boolean;
   maxPerDay: number | null;
   justCreated: boolean;
 }) {
   const [open, setOpen] = useState(justCreated);
+  const [cloudSimulation, setCloudSimulation] = useState(initialCloudSimulation);
+  const [isSavingSimulation, setIsSavingSimulation] = useState(false);
   const [tab, setTab] = useState<Tab>("python");
   const [token, setToken] = useState(initialToken);
   const [showToken, setShowToken] = useState(false);
@@ -126,6 +134,26 @@ export function DeviceConnect({
     URL.revokeObjectURL(link.href);
   };
 
+  const toggleCloudSimulation = async () => {
+    const next = !cloudSimulation;
+    setCloudSimulation(next);
+    setIsSavingSimulation(true);
+    setError(null);
+
+    const supabase = createClient();
+    const { error: rpcError } = await supabase.rpc("set_cloud_simulation", {
+      p_device_id: deviceId,
+      p_enabled: next,
+    });
+
+    if (rpcError) {
+      // Si el servidor no lo guardó, el interruptor vuelve a su estado real.
+      setCloudSimulation(!next);
+      setError(rpcError.message);
+    }
+    setIsSavingSimulation(false);
+  };
+
   const regenerate = async () => {
     const confirmed = window.confirm(
       "¿Regenerar el token? El token actual deja de funcionar de inmediato: los scripts que ya descargaste recibirán un error 401 y tendrás que descargarlos de nuevo.",
@@ -169,6 +197,48 @@ export function DeviceConnect({
         >
           {open ? "Ocultar" : "Conectar / simular"}
         </Button>
+      </div>
+
+      <div className="mt-4 flex items-start justify-between gap-4 rounded-md border border-line p-3">
+        <div className="text-xs text-muted2">
+          <p className="text-sm font-medium text-panel-ink">Simulación en la nube</p>
+          <p className="mt-1">
+            Sema incluye una simulación propia: {CLOUD_SIM_EVERY} envía a este
+            dispositivo una lectura de ejemplo, sin que tengas que hacer nada,
+            para que veas la plataforma funcionando. Cada dispositivo tiene un
+            cupo diario de lecturas según tu plan
+            {maxPerDay ? ` (el tuyo permite ${maxPerDay} al día)` : ""}, y la
+            simulación comparte ese cupo con tus propios scripts o sensores.
+          </p>
+          <p className="mt-1">
+            Déjala activada para explorar sin escribir código. Desactívala
+            cuando quieras que este dispositivo reciba únicamente tus datos: así
+            no se mezclan y conservas todo el cupo. El cambio se aplica en la
+            siguiente ronda de la simulación.
+          </p>
+        </div>
+        <div className="flex shrink-0 flex-col items-center gap-1">
+          <button
+            type="button"
+            role="switch"
+            aria-checked={cloudSimulation}
+            aria-label="Simulación en la nube"
+            onClick={toggleCloudSimulation}
+            disabled={isSavingSimulation}
+            className={`relative h-6 w-11 rounded-full transition-colors disabled:opacity-60 ${
+              cloudSimulation ? "bg-brand" : "bg-line"
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${
+                cloudSimulation ? "left-[22px]" : "left-0.5"
+              }`}
+            />
+          </button>
+          <span className="text-xs text-muted2">
+            {cloudSimulation ? "Activada" : "Desactivada"}
+          </span>
+        </div>
       </div>
 
       {open && (

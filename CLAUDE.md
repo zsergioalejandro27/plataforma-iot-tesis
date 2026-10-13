@@ -19,7 +19,7 @@ Dispositivos/simulador --MQTT--> HiveMQ Cloud --MQTT--> bridge.py --> Supabase (
 ```
 
 - `bridge/bridge.py`: se suscribe a `device/+/telemetry`, busca el `device_key` en la tabla `devices`, e inserta en `telemetry` con la llave de servicio (se salta RLS, pero los triggers de límites sí aplican).
-- `simulator/`: `publish_test.py <device_key>` publica una vez; `auto_publisher.py` publica en bucle a todos los dispositivos (relee la tabla en cada ronda, intervalo en `PUBLISH_INTERVAL_SECONDS`); `payload_generator.py` genera las 10 métricas aleatorias, compartido por ambos.
+- `simulator/`: `publish_test.py <device_key>` publica una vez; `auto_publisher.py` publica en bucle a los dispositivos con `cloud_simulation = true` (relee la tabla en cada ronda, intervalo en `PUBLISH_INTERVAL_SECONDS`; si se cambia hay que copiarlo a AWS con `scp` y reiniciar `plataforma-iot-publisher`); `payload_generator.py` genera las 10 métricas aleatorias, compartido por ambos.
 - `frontend/`: Next.js 16 (App Router), TypeScript, Tailwind v3, shadcn/ui, Recharts. Desplegado en Vercel con auto-deploy en cada push.
 - `supabase/schema.sql`: respaldo del esquema completo (tablas, funciones, triggers, RLS). Se mantiene a mano; actualízalo después de cada migración hecha en el SQL Editor. Se escribió sin `supabase db dump` porque requiere Docker, que el autor no tiene.
 
@@ -37,7 +37,7 @@ Dispositivos/simulador --MQTT--> HiveMQ Cloud --MQTT--> bridge.py --> Supabase (
 
 ## Modelo de datos
 
-`tenants` (con `plan_id`, `plan_selected`), `profiles`, `devices` (`device_key` único y público; `api_token` único y secreto, solo visible para su tenant por RLS, usado por `/api/ingest`), `telemetry` (`payload` jsonb), `plans` (basico/medio/pro). El trigger `handle_new_user` crea un tenant nuevo por cada registro. El aislamiento entre tenants es solo por RLS, vía la función `get_my_tenant_id()`; no hay lógica de tenant en el código de la app.
+`tenants` (con `plan_id`, `plan_selected`), `profiles`, `devices` (`device_key` único y público; `api_token` único y secreto, solo visible para su tenant por RLS, usado por `/api/ingest`; `cloud_simulation` boolean, por defecto true: si está activa, el publicador de AWS le envía lecturas simuladas; el dueño la cambia con la función SQL `set_cloud_simulation` desde el interruptor de la tarjeta "Conectar este dispositivo"), `telemetry` (`payload` jsonb), `plans` (basico/medio/pro). El trigger `handle_new_user` crea un tenant nuevo por cada registro. El aislamiento entre tenants es solo por RLS, vía la función `get_my_tenant_id()`; no hay lógica de tenant en el código de la app.
 
 Los límites por plan los imponen dos triggers `BEFORE INSERT` en Postgres: `enforce_device_limit` (dispositivos por tenant) y `enforce_reading_limit` (lecturas por dispositivo en una ventana móvil de 24 horas; no se borra nada, las lecturas viejas se conservan para el histórico).
 
