@@ -108,8 +108,12 @@ create table public.devices (
   created_at timestamp with time zone default now(),
   metric_key text,
   unit text,
+  -- Token secreto por dispositivo para la puerta HTTP (/api/ingest). Lo ve
+  -- solo el tenant dueño (RLS de devices). 64 caracteres hex aleatorios.
+  api_token text not null default replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', ''),
   constraint devices_pkey primary key (id),
   constraint devices_device_key_key unique (device_key),
+  constraint devices_api_token_key unique (api_token),
   constraint devices_tenant_id_fkey foreign key (tenant_id) references public.tenants (id)
 );
 
