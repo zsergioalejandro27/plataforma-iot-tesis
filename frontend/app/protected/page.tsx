@@ -23,7 +23,7 @@ export default async function ProtectedPage() {
 
   const { data: devices } = await supabase
     .from("devices")
-    .select("id, name, device_key, metric_key, unit")
+    .select("id, name, device_key, metric_key, unit, color, location")
     .order("created_at", { ascending: true });
 
   const devicesWithTelemetry = await Promise.all(

@@ -26,14 +26,14 @@ export function HeroPreview() {
           name="Sensor Temperatura 1"
           deviceKey="device-001"
           statusLabel="en línea"
-          statusColorClass="bg-brand"
+          statusColorClass="bg-online"
           value="22.7°C"
         />
         <DeviceRow
           name="Sensor Humedad 1"
           deviceKey="device-002"
           statusLabel="en línea"
-          statusColorClass="bg-brand"
+          statusColorClass="bg-online"
           value="58%"
         />
       </div>

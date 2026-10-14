@@ -54,16 +54,13 @@ export function DeviceTabs({
         ))}
       </div>
 
-      {/* La gráfica calcula su tamaño y su scroll al montarse; si naciera
-          oculta quedaría mal medida. Con la key cambia al activarse y se
-          vuelve a montar ya visible. */}
       <div
         id="panel-lecturas"
         role="tabpanel"
         aria-labelledby="tab-lecturas"
         hidden={active !== "lecturas"}
       >
-        <div key={active === "lecturas" ? "visible" : "hidden"}>{readings}</div>
+        {readings}
       </div>
 
       <div

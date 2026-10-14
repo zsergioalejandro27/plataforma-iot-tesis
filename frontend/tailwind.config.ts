@@ -21,6 +21,9 @@ export default {
           foreground: "#F7F6F2",
         },
         live: "#E2A33D",
+        // Estado "en línea". Fijo a propósito: aunque cada organización cambie
+        // su color de acento (brand), el estado no debe cambiar de significado.
+        online: "#2B6E63",
         line: "#D8D4C9",
         muted2: "#5B6663",
         

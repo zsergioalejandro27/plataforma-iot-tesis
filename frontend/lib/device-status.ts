@@ -11,7 +11,7 @@ export function getDeviceStatus(lastRecordedAt: string | null): DeviceStatus {
   const diffMinutes = (Date.now() - new Date(lastRecordedAt).getTime()) / 1000 / 60;
 
   if (diffMinutes < 10) {
-    return { label: "en línea", colorClass: "bg-brand" };
+    return { label: "en línea", colorClass: "bg-online" };
   }
   if (diffMinutes < 60) {
     return { label: `sin señal hace ${Math.round(diffMinutes)}min`, colorClass: "bg-line" };

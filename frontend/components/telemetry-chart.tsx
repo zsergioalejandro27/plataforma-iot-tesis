@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 import {
   ComposedChart,
   DefaultTooltipContent,
@@ -74,15 +75,39 @@ function niceAxis(values: number[]) {
   return { domain: [ticks[0], ticks[ticks.length - 1]] as [number, number], ticks };
 }
 
+const DEFAULT_COLOR = "#2B6E63";
+
 export function TelemetryChart({
   data,
   unit,
+  color = DEFAULT_COLOR,
+  deviceId,
+  initialChartType = "line",
 }: {
   data: TelemetryPoint[];
   unit: string | null;
+  // Color de la serie (el del dispositivo). Sin él, el verde de siempre.
+  color?: string;
+  // Con deviceId, el tipo de gráfica elegido se guarda en el dispositivo y se
+  // recuerda la próxima vez. La vista previa de la landing no lo pasa.
+  deviceId?: string;
+  initialChartType?: ChartType;
 }) {
-  const [chartType, setChartType] = useState<ChartType>("line");
+  const [chartType, setChartType] = useState<ChartType>(initialChartType);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const selectChartType = (type: ChartType) => {
+    setChartType(type);
+    if (!deviceId) return;
+    // Se guarda sin esperar ni avisar: es solo una preferencia visual.
+    createClient()
+      .from("devices")
+      .update({ chart_type: type })
+      .eq("id", deviceId)
+      .then(({ error }) => {
+        if (error) console.error("No se pudo guardar el tipo de gráfica:", error.message);
+      });
+  };
 
   // Al cargar (o al llegar lecturas nuevas) el scroll va al extremo derecho,
   // donde están las lecturas más recientes. Se hace en un efecto porque
@@ -91,6 +116,23 @@ export function TelemetryChart({
     const el = scrollRef.current;
     if (el) el.scrollLeft = el.scrollWidth;
   }, [data.length, chartType]);
+
+  // Si la gráfica nace dentro de una pestaña oculta mide 0 de ancho y el
+  // efecto de arriba no puede mover nada. Cuando por fin se hace visible
+  // (su ancho pasa de 0 a algo) llevamos el scroll al extremo una vez.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    let wasHidden = el.clientWidth === 0;
+    const observer = new ResizeObserver(() => {
+      if (wasHidden && el.clientWidth > 0) {
+        el.scrollLeft = el.scrollWidth;
+        wasHidden = false;
+      }
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const points = data.map((point, index) => ({
     ...point,
@@ -116,7 +158,7 @@ export function TelemetryChart({
           <button
             key={option.type}
             type="button"
-            onClick={() => setChartType(option.type)}
+            onClick={() => selectChartType(option.type)}
             className={`rounded px-3 py-1 text-xs font-medium transition-colors ${
               chartType === option.type
                 ? "bg-brand text-brand-foreground"
@@ -239,7 +281,7 @@ export function TelemetryChart({
                   <Line
                     type="monotone"
                     dataKey="value"
-                    stroke="#2B6E63"
+                    stroke={color}
                     strokeWidth={2}
                     dot={false}
                   />
@@ -247,9 +289,9 @@ export function TelemetryChart({
                 {chartType === "bar" && (
                   <Bar
                     dataKey="value"
-                    fill="#2B6E63"
+                    fill={color}
                     fillOpacity={0.25}
-                    stroke="#2B6E63"
+                    stroke={color}
                     strokeWidth={1.5}
                     radius={[4, 4, 0, 0]}
                   />
@@ -257,8 +299,8 @@ export function TelemetryChart({
                 {chartType === "scatter" && (
                   <Scatter
                     dataKey="value"
-                    fill="#2B6E63"
-                    line={{ stroke: "#2B6E63", strokeWidth: 1 }}
+                    fill={color}
+                    line={{ stroke: color, strokeWidth: 1 }}
                     lineType="joint"
                   />
                 )}

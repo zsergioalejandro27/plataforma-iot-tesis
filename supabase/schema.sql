@@ -115,7 +115,16 @@ create table public.devices (
   -- le envía lecturas simuladas periódicamente. El dueño lo apaga desde la
   -- tarjeta "Conectar este dispositivo" para recibir solo sus propios datos.
   cloud_simulation boolean not null default true,
+  -- Personalización (pestaña "Personalizar" del dispositivo). Los usuarios solo
+  -- pueden actualizar estas columnas y name (ver permisos por columna abajo).
+  color text,            -- #RRGGBB elegido de la paleta (lib/palette.ts); null = el que sale del id
+  location text,         -- ubicación o etiqueta libre, hasta 40 caracteres
+  chart_type text not null default 'line',  -- 'line' | 'bar' | 'scatter', se recuerda sola
   constraint devices_pkey primary key (id),
+  constraint devices_color_format check (color is null or color ~ '^#[0-9A-Fa-f]{6}$'),
+  constraint devices_location_length check (location is null or char_length(location) <= 40),
+  constraint devices_chart_type_values check (chart_type in ('line', 'bar', 'scatter')),
+  constraint devices_name_length check (char_length(name) between 1 and 60),
   constraint devices_device_key_key unique (device_key),
   constraint devices_api_token_key unique (api_token),
   constraint devices_tenant_id_fkey foreign key (tenant_id) references public.tenants (id)
@@ -304,6 +313,20 @@ create policy "usuarios crean dispositivos en su tenant"
   on public.devices for insert
   to public
   with check (tenant_id = get_my_tenant_id());
+
+-- Los usuarios pueden actualizar dispositivos de su tenant, pero SOLO las
+-- columnas de personalización: el permiso se da por columna, así nunca pueden
+-- tocar api_token, device_key ni cloud_simulation (esas se cambian solo con
+-- las funciones regenerate_device_token y set_cloud_simulation).
+create policy "usuarios actualizan dispositivos de su tenant"
+  on public.devices for update
+  to authenticated
+  using (tenant_id = get_my_tenant_id())
+  with check (tenant_id = get_my_tenant_id());
+
+revoke update on public.devices from anon, authenticated;
+grant update (name, color, location, chart_type)
+  on public.devices to authenticated;
 
 create policy "usuarios eliminan dispositivos de su tenant"
   on public.devices for delete

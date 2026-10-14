@@ -2,6 +2,8 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getDisplayValue, getMetricValue } from "@/lib/device-status";
+import { colorForDevice } from "@/lib/palette";
+import { DeviceCustomize } from "@/components/device-customize";
 import { TelemetryChart } from "@/components/telemetry-chart";
 import { DeleteDeviceButton } from "@/components/delete-device-button";
 import { DeviceConnect } from "@/components/device-connect";
@@ -39,7 +41,9 @@ export default async function DeviceDetailPage({
 
   const { data: device } = await supabase
     .from("devices")
-    .select("id, name, device_key, metric_key, unit, api_token, cloud_simulation")
+    .select(
+      "id, name, device_key, metric_key, unit, api_token, cloud_simulation, color, location, chart_type",
+    )
     .eq("id", id)
     .single();
 
@@ -57,6 +61,7 @@ export default async function DeviceDetailPage({
   // Todo se formatea con timeZone explícito: este código corre en el servidor
   // de Vercel (UTC), no en el navegador de Bogotá.
   const TZ = "America/Bogota";
+  const deviceColor = colorForDevice(device.id, device.color);
   const chartData = (telemetry ?? [])
     .slice()
     .reverse()
@@ -106,6 +111,7 @@ export default async function DeviceDetailPage({
           </Link>
           <h1 className="mt-2 text-xl font-semibold text-panel-ink">{device.name}</h1>
           <p className="text-sm text-muted2">
+            {device.location ? `${device.location} · ` : ""}
             {device.device_key} · {tenantName}
           </p>
         </div>
@@ -121,7 +127,17 @@ export default async function DeviceDetailPage({
             </p>
           ) : (
             <>
-              <TelemetryChart data={chartData} unit={device.unit} />
+              <TelemetryChart
+                data={chartData}
+                unit={device.unit}
+                color={deviceColor}
+                deviceId={device.id}
+                initialChartType={
+                  device.chart_type === "bar" || device.chart_type === "scatter"
+                    ? device.chart_type
+                    : "line"
+                }
+              />
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-line text-left text-muted2">
@@ -158,6 +174,14 @@ export default async function DeviceDetailPage({
             initialCloudSimulation={device.cloud_simulation}
             maxPerDay={maxPerDay}
             justCreated={created === "1"}
+          />
+        }
+        customize={
+          <DeviceCustomize
+            deviceId={device.id}
+            initialName={device.name}
+            initialLocation={device.location}
+            initialColor={deviceColor}
           />
         }
       />

@@ -6,6 +6,7 @@ import type { RealtimeChannel } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { DeviceRow } from "@/components/device-row";
 import { getDeviceStatus, getDisplayValue } from "@/lib/device-status";
+import { colorForDevice } from "@/lib/palette";
 
 type LastTelemetry = {
   payload: unknown;
@@ -18,6 +19,8 @@ export type DeviceWithTelemetry = {
   device_key: string;
   metric_key: string | null;
   unit: string | null;
+  color: string | null;
+  location: string | null;
   lastTelemetry: LastTelemetry;
 };
 
@@ -107,6 +110,8 @@ export function DeviceList({
               statusLabel={status.label}
               statusColorClass={status.colorClass}
               value={displayValue}
+              color={colorForDevice(device.id, device.color)}
+              location={device.location}
             />
           </Link>
         );
