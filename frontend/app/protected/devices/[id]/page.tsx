@@ -5,6 +5,7 @@ import { getDisplayValue, getMetricValue } from "@/lib/device-status";
 import { TelemetryChart } from "@/components/telemetry-chart";
 import { DeleteDeviceButton } from "@/components/delete-device-button";
 import { DeviceConnect } from "@/components/device-connect";
+import { DeviceTabs } from "@/components/device-tabs";
 
 export default async function DeviceDetailPage({
   params,
@@ -111,49 +112,55 @@ export default async function DeviceDetailPage({
         <DeleteDeviceButton deviceId={device.id} deviceName={device.name} />
       </div>
 
-      <DeviceConnect
-        deviceId={device.id}
-        deviceName={device.name}
-        deviceKey={device.device_key}
-        metricKey={device.metric_key}
-        unit={device.unit}
-        initialToken={device.api_token}
-        initialCloudSimulation={device.cloud_simulation}
-        maxPerDay={maxPerDay}
-        justCreated={created === "1"}
+      <DeviceTabs
+        defaultTab={created === "1" ? "conectar" : "lecturas"}
+        readings={
+          !telemetry || telemetry.length === 0 ? (
+            <p className="p-5 text-sm text-muted2">
+              Aún no hay lecturas registradas para este dispositivo.
+            </p>
+          ) : (
+            <>
+              <TelemetryChart data={chartData} unit={device.unit} />
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-line text-left text-muted2">
+                    <th className="px-5 py-3 font-medium">Fecha y hora</th>
+                    <th className="px-5 py-3 font-medium">Valor</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {telemetry.slice(0, 50).map((row) => (
+                    <tr key={row.id} className="border-b border-line last:border-b-0">
+                      <td className="px-5 py-3 text-panel-ink">
+                        {new Date(row.recorded_at).toLocaleString("es-CO", {
+                          timeZone: "America/Bogota",
+                        })}
+                      </td>
+                      <td className="px-5 py-3 font-mono text-panel-ink">
+                        {getDisplayValue(row.payload, device.metric_key, device.unit)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
+          )
+        }
+        connect={
+          <DeviceConnect
+            deviceId={device.id}
+            deviceName={device.name}
+            deviceKey={device.device_key}
+            metricKey={device.metric_key}
+            unit={device.unit}
+            initialToken={device.api_token}
+            initialCloudSimulation={device.cloud_simulation}
+            maxPerDay={maxPerDay}
+            justCreated={created === "1"}
+          />
+        }
       />
-
-      {!telemetry || telemetry.length === 0 ? (
-        <p className="p-5 text-sm text-muted2">
-          Aún no hay lecturas registradas para este dispositivo.
-        </p>
-      ) : (
-        <>
-          <TelemetryChart data={chartData} unit={device.unit} />
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-line text-left text-muted2">
-                <th className="px-5 py-3 font-medium">Fecha y hora</th>
-                <th className="px-5 py-3 font-medium">Valor</th>
-              </tr>
-            </thead>
-            <tbody>
-              {telemetry.slice(0, 50).map((row) => (
-                <tr key={row.id} className="border-b border-line last:border-b-0">
-                  <td className="px-5 py-3 text-panel-ink">
-                    {new Date(row.recorded_at).toLocaleString("es-CO", {
-                      timeZone: "America/Bogota",
-                    })}
-                  </td>
-                  <td className="px-5 py-3 font-mono text-panel-ink">
-                    {getDisplayValue(row.payload, device.metric_key, device.unit)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </>
-      )}
     </div>
   );
 }
