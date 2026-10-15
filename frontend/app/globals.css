@@ -110,3 +110,9 @@
     opacity: 1;
   }
 }
+
+/* Color de acento por defecto (verde pino #2B6E63) como "R G B". Cada
+   organización lo sobrescribe en el layout de /protected con su propio color. */
+:root {
+  --brand-rgb: 43 110 99;
+}

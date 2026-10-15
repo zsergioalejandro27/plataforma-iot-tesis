@@ -28,15 +28,18 @@ export default async function DeviceDetailPage({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("tenants(name, plans(max_readings_per_device))")
+    .select("tenants(name, time_format, plans(max_readings_per_device))")
     .eq("id", userId)
     .single();
 
   const tenant = profile?.tenants as {
     name?: string;
+    time_format?: string | null;
     plans?: { max_readings_per_device?: number } | null;
   } | null;
   const tenantName = tenant?.name ?? "Tu organización";
+  // Formato de hora que eligió la organización (12 horas por defecto).
+  const hour12 = tenant?.time_format !== "24h";
   const maxPerDay = tenant?.plans?.max_readings_per_device ?? null;
 
   const { data: device } = await supabase
@@ -83,7 +86,7 @@ export default async function DeviceDetailPage({
           .toLocaleTimeString("es-CO", {
             hour: "numeric",
             minute: "2-digit",
-            hour12: true,
+            hour12,
             timeZone: TZ,
           })
           .replace(/\s*([ap])\.\s*m\./i, " $1m"),
@@ -96,6 +99,7 @@ export default async function DeviceDetailPage({
           month: "long",
           hour: "numeric",
           minute: "2-digit",
+          hour12,
           timeZone: TZ,
         }),
         value: getMetricValue(row.payload, device.metric_key) ?? 0,
@@ -150,6 +154,7 @@ export default async function DeviceDetailPage({
                     <tr key={row.id} className="border-b border-line last:border-b-0">
                       <td className="px-5 py-3 text-panel-ink">
                         {new Date(row.recorded_at).toLocaleString("es-CO", {
+                          hour12,
                           timeZone: "America/Bogota",
                         })}
                       </td>

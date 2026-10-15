@@ -83,6 +83,13 @@ create table public.tenants (
   name text not null,
   plan_id text not null default 'basico',
   plan_selected boolean not null default false,
+  -- Personalización de la organización (página /protected/settings). El nombre
+  -- ya es la columna name de arriba.
+  accent_color text,                          -- #RRGGBB de la paleta; null = verde pino por defecto
+  time_format text not null default '12h',    -- '12h' | '24h' para gráficas e historial
+  constraint tenants_accent_color_format check (accent_color is null or accent_color ~ '^#[0-9A-Fa-f]{6}$'),
+  constraint tenants_time_format_values check (time_format in ('12h', '24h')),
+  constraint tenants_name_length check (char_length(name) between 1 and 60),
   created_at timestamp with time zone default now(),
   constraint tenants_pkey primary key (id),
   constraint tenants_plan_id_fkey foreign key (plan_id) references public.plans (id)

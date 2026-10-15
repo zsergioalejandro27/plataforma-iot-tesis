@@ -17,7 +17,11 @@ export default {
           surface: "#F7F6F2",
         },
         brand: {
-          DEFAULT: "#2B6E63",
+          // Color de acento. Sale de la variable CSS --brand-rgb (verde pino
+          // por defecto, en globals.css) para que cada organización pueda
+          // cambiarlo: el layout de /protected la sobrescribe. El formato
+          // <alpha-value> mantiene funcionando bg-brand/90, bg-brand/10, etc.
+          DEFAULT: "rgb(var(--brand-rgb) / <alpha-value>)",
           foreground: "#F7F6F2",
         },
         live: "#E2A33D",

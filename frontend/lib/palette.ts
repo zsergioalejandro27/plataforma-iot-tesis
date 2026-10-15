@@ -30,6 +30,13 @@ export function isValidHex(value: unknown): value is string {
   return typeof value === "string" && HEX_COLOR.test(value);
 }
 
+// "#2B6E63" -> "43 110 99": el formato que usa la variable CSS --brand-rgb
+// (tailwind.config.ts la combina con la transparencia: bg-brand/90, etc.).
+export function hexToRgbTriplet(hex: string): string {
+  const n = parseInt(hex.slice(1), 16);
+  return `${(n >> 16) & 255} ${(n >> 8) & 255} ${n & 255}`;
+}
+
 // Color de un dispositivo que no eligió uno: sale del id, así cada uno tiene
 // siempre el mismo color sin guardar nada en la base.
 export function colorForDevice(deviceId: string, saved: string | null | undefined): string {
