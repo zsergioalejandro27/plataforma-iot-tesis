@@ -1,5 +1,5 @@
 import { LoginForm } from "@/components/login-form";
-import { AuthSidePanel } from "@/components/auth-side-panel";
+import { AuthSidePanel, AuthMobileBrand } from "@/components/auth-side-panel";
 
 export default function Page() {
   return (
@@ -7,6 +7,7 @@ export default function Page() {
       <AuthSidePanel />
       <div className="flex w-full md:w-1/2 lg:w-2/5 items-center justify-center bg-panel-surface p-6 md:p-10">
         <div className="w-full max-w-sm">
+          <AuthMobileBrand />
           <LoginForm />
         </div>
       </div>

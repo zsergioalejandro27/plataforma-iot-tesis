@@ -32,7 +32,7 @@ export function DeviceTabs({
     <div>
       <div
         role="tablist"
-        className="flex gap-5 border-b border-line px-5"
+        className="flex gap-5 overflow-x-auto border-b border-line px-5"
       >
         {tabs.map((tab) => (
           <button
@@ -43,7 +43,7 @@ export function DeviceTabs({
             aria-selected={active === tab.id}
             aria-controls={`panel-${tab.id}`}
             onClick={() => setActive(tab.id)}
-            className={`-mb-px border-b-2 py-3 text-sm font-medium transition-colors ${
+            className={`-mb-px shrink-0 whitespace-nowrap border-b-2 py-3 text-sm font-medium transition-colors ${
               active === tab.id
                 ? "border-brand text-panel-ink"
                 : "border-transparent text-muted2 hover:text-panel-ink"

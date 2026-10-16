@@ -9,8 +9,11 @@ export async function AuthButton() {
   const user = data?.claims;
 
   return user ? (
-    <div className="flex items-center gap-4">
-      <span className="text-sm text-panel-surface/80">{user.email}</span>
+    <div className="ml-auto flex items-center gap-4">
+      {/* El correo se oculta en pantallas pequeñas por falta de espacio. */}
+      <span className="hidden max-w-[16rem] truncate text-sm text-panel-surface/80 sm:inline">
+        {user.email}
+      </span>
       <LogoutButton />
     </div>
   ) : (

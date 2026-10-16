@@ -20,9 +20,10 @@ export function DeviceRow({
   location,
 }: DeviceRowProps) {
   return (
-    <div className="flex items-center gap-4 border-b border-line last:border-b-0 px-5 py-4">
-      <div className={`h-10 w-1 rounded-full ${statusColorClass}`} />
-      <div className="flex-1">
+    <div className="flex items-center gap-3 border-b border-line last:border-b-0 px-4 py-4 sm:gap-4 sm:px-5">
+      <div className={`h-10 w-1 shrink-0 rounded-full ${statusColorClass}`} />
+      {/* min-w-0: deja que el texto largo se parta en vez de empujar el valor. */}
+      <div className="min-w-0 flex-1">
         <p className="flex items-center gap-2 font-medium text-panel-ink">
           {color && (
             <span
@@ -38,7 +39,7 @@ export function DeviceRow({
           {deviceKey} · {statusLabel}
         </p>
       </div>
-      <div className="font-mono text-lg text-panel-ink">{value}</div>
+      <div className="shrink-0 font-mono text-base text-panel-ink sm:text-lg">{value}</div>
     </div>
   );
 }

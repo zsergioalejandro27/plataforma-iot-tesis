@@ -183,7 +183,7 @@ export function DeviceConnect({
       {/* Sección 1: simulación en la nube. Va aparte y arriba para que no
           parta en dos el panel de conexión cuando se despliega. */}
       <div className="border-b border-line p-5">
-        <div className="flex items-start justify-between gap-4 rounded-md border border-line p-3">
+        <div className="flex flex-col gap-3 rounded-md border border-line p-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div className="text-xs text-muted2">
             <p className="text-sm font-medium text-panel-ink">Simulación en la nube</p>
             <p className="mt-1">
@@ -204,7 +204,8 @@ export function DeviceConnect({
               <p className="mt-2 text-red-600">{simulationError}</p>
             )}
           </div>
-          <div className="flex shrink-0 flex-col items-center gap-1">
+          {/* En celular el interruptor va arriba del texto, en una fila. */}
+          <div className="order-first flex shrink-0 flex-row items-center gap-2 sm:order-none sm:flex-col sm:gap-1">
             <button
               type="button"
               role="switch"

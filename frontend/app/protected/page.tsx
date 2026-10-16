@@ -42,10 +42,10 @@ export default async function ProtectedPage() {
 
   return (
     <div className="rounded-lg border border-line bg-white">
-      <div className="flex items-center justify-between border-b border-line p-5">
-        <div>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line p-5">
+        <div className="min-w-0">
           <h1 className="text-xl font-semibold text-panel-ink">Dispositivos</h1>
-          <p className="text-sm text-muted2">{tenantName}</p>
+          <p className="break-words text-sm text-muted2">{tenantName}</p>
         </div>
         <Button asChild size="sm" className="bg-brand text-brand-foreground hover:bg-brand/90">
           <Link href="/protected/devices/new">+ Agregar dispositivo</Link>

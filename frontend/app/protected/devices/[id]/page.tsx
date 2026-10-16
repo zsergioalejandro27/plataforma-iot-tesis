@@ -108,13 +108,13 @@ export default async function DeviceDetailPage({
 
   return (
     <div className="rounded-lg border border-line bg-white">
-      <div className="flex items-start justify-between border-b border-line p-5">
-        <div>
+      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-line p-5">
+        <div className="min-w-0">
           <Link href="/protected" className="text-sm text-muted2 hover:text-panel-ink">
             ← Volver
           </Link>
-          <h1 className="mt-2 text-xl font-semibold text-panel-ink">{device.name}</h1>
-          <p className="text-sm text-muted2">
+          <h1 className="mt-2 break-words text-xl font-semibold text-panel-ink">{device.name}</h1>
+          <p className="break-words text-sm text-muted2">
             {device.location ? `${device.location} · ` : ""}
             {device.device_key} · {tenantName}
           </p>
@@ -145,20 +145,20 @@ export default async function DeviceDetailPage({
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-line text-left text-muted2">
-                    <th className="px-5 py-3 font-medium">Fecha y hora</th>
-                    <th className="px-5 py-3 font-medium">Valor</th>
+                    <th className="px-3 py-3 font-medium sm:px-5">Fecha y hora</th>
+                    <th className="px-3 py-3 font-medium sm:px-5">Valor</th>
                   </tr>
                 </thead>
                 <tbody>
                   {telemetry.slice(0, 50).map((row) => (
                     <tr key={row.id} className="border-b border-line last:border-b-0">
-                      <td className="px-5 py-3 text-panel-ink">
+                      <td className="px-3 py-3 text-panel-ink sm:px-5">
                         {new Date(row.recorded_at).toLocaleString("es-CO", {
                           hour12,
                           timeZone: "America/Bogota",
                         })}
                       </td>
-                      <td className="px-5 py-3 font-mono text-panel-ink">
+                      <td className="px-3 py-3 font-mono text-panel-ink sm:px-5">
                         {getDisplayValue(row.payload, device.metric_key, device.unit)}
                       </td>
                     </tr>
