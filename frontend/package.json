@@ -4,7 +4,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test:insights": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tests/insights.test.mts"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.3.1",

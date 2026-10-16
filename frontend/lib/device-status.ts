@@ -1,22 +1,35 @@
+import { onlineWindowMs } from "@/lib/insights";
+
 export type DeviceStatus = {
   label: string;
   colorClass: string;
 };
 
-export function getDeviceStatus(lastRecordedAt: string | null): DeviceStatus {
+// `typicalIntervalMs` es cada cuánto suele enviar este dispositivo (lib/insights.ts).
+// Con él, uno que publica cada hora sigue "en línea" a los 58 minutos; sin él
+// (dispositivo nuevo, pocas lecturas) se usa la ventana mínima de 10 minutos.
+export function getDeviceStatus(
+  lastRecordedAt: string | null,
+  typicalIntervalMs: number | null = null,
+): DeviceStatus {
   if (!lastRecordedAt) {
     return { label: "sin datos", colorClass: "bg-line" };
   }
 
-  const diffMinutes = (Date.now() - new Date(lastRecordedAt).getTime()) / 1000 / 60;
+  const diffMs = Date.now() - new Date(lastRecordedAt).getTime();
 
-  if (diffMinutes < 10) {
+  if (diffMs < onlineWindowMs(typicalIntervalMs)) {
     return { label: "en línea", colorClass: "bg-online" };
   }
+
+  const diffMinutes = diffMs / 1000 / 60;
   if (diffMinutes < 60) {
     return { label: `sin señal hace ${Math.round(diffMinutes)}min`, colorClass: "bg-line" };
   }
   const diffHours = Math.round(diffMinutes / 60);
+  if (diffHours >= 48) {
+    return { label: `sin señal hace ${Math.round(diffHours / 24)}d`, colorClass: "bg-line" };
+  }
   return { label: `sin señal hace ${diffHours}h`, colorClass: "bg-line" };
 }
 

@@ -21,6 +21,8 @@ export type DeviceWithTelemetry = {
   unit: string | null;
   color: string | null;
   location: string | null;
+  // Cada cuánto suele enviar este dispositivo (null si hay pocas lecturas).
+  typicalIntervalMs: number | null;
   lastTelemetry: LastTelemetry;
 };
 
@@ -91,7 +93,10 @@ export function DeviceList({
   return (
     <>
       {devices.map((device) => {
-        const status = getDeviceStatus(device.lastTelemetry?.recorded_at ?? null);
+        const status = getDeviceStatus(
+          device.lastTelemetry?.recorded_at ?? null,
+          device.typicalIntervalMs,
+        );
         const displayValue = getDisplayValue(
           device.lastTelemetry?.payload,
           device.metric_key,
