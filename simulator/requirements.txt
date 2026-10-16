@@ -1,0 +1,7 @@
+# Dependencias de los simuladores (probado con Python 3.13).
+# Instalar:  py -m pip install -r requirements.txt     (Windows)
+#            python3 -m pip install -r requirements.txt (Mac / Linux / servidor)
+paho-mqtt>=2.1,<3
+python-dotenv>=1.0,<2
+# Solo lo usa auto_publisher.py (lee la lista de dispositivos de la base de datos).
+supabase>=2.0,<3

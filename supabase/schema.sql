@@ -344,3 +344,19 @@ create policy "usuarios ven telemetria de su tenant"
   on public.telemetry for select
   to public
   using (tenant_id = get_my_tenant_id());
+
+-- ---------------------------------------------------------------------
+-- Realtime
+-- ---------------------------------------------------------------------
+-- El dashboard se actualiza solo porque la tabla telemetry está en la
+-- publicación supabase_realtime (sin esto no llegan los eventos). El bloque
+-- no falla si la tabla ya estaba en la publicación.
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'telemetry'
+  ) then
+    alter publication supabase_realtime add table public.telemetry;
+  end if;
+end $$;

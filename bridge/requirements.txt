@@ -1,0 +1,6 @@
+# Dependencias del bridge (probado con Python 3.13).
+# Instalar:  py -m pip install -r requirements.txt     (Windows)
+#            python3 -m pip install -r requirements.txt (Mac / Linux / servidor)
+paho-mqtt>=2.1,<3
+python-dotenv>=1.0,<2
+supabase>=2.0,<3
