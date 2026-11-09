@@ -8,6 +8,7 @@ import { TelemetryChart } from "@/components/telemetry-chart";
 import { DeleteDeviceButton } from "@/components/delete-device-button";
 import { DeviceConnect } from "@/components/device-connect";
 import { DeviceTabs } from "@/components/device-tabs";
+import { ExportCsvButton } from "@/components/export-csv-button";
 
 export default async function DeviceDetailPage({
   params,
@@ -28,19 +29,44 @@ export default async function DeviceDetailPage({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("tenants(name, time_format, plans(max_readings_per_device))")
+    .select("tenants(name, time_format, plans(max_readings_per_device, max_exports_per_day))")
     .eq("id", userId)
     .single();
 
   const tenant = profile?.tenants as {
     name?: string;
     time_format?: string | null;
-    plans?: { max_readings_per_device?: number } | null;
+    plans?: { max_readings_per_device?: number; max_exports_per_day?: number } | null;
   } | null;
   const tenantName = tenant?.name ?? "Tu organización";
   // Formato de hora que eligió la organización (12 horas por defecto).
   const hour12 = tenant?.time_format !== "24h";
   const maxPerDay = tenant?.plans?.max_readings_per_device ?? null;
+
+  // Cupo de exportaciones de la organización en las últimas 24 h (RLS solo
+  // deja ver las propias). Si ya se agotó, la más vieja de la ventana dice
+  // cuándo se libera el siguiente cupo.
+  const maxExports = tenant?.plans?.max_exports_per_day ?? 1;
+  const { data: recentExports } = await supabase
+    .from("exports")
+    .select("created_at")
+    .gte("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+    .order("created_at", { ascending: true });
+  const exportsRemaining = Math.max(0, maxExports - (recentExports?.length ?? 0));
+  let nextExportLabel: string | null = null;
+  if (exportsRemaining === 0 && recentExports?.[0]) {
+    const next = new Date(new Date(recentExports[0].created_at).getTime() + 24 * 60 * 60 * 1000);
+    const dayOf = (d: Date) => d.toLocaleDateString("en-CA", { timeZone: "America/Bogota" });
+    const time = next
+      .toLocaleTimeString("es-CO", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12,
+        timeZone: "America/Bogota",
+      })
+      .replace(/\s*([ap])\.\s*m\./i, " $1m");
+    nextExportLabel = `${dayOf(next) === dayOf(new Date()) ? "hoy" : "mañana"} a las ${time}`;
+  }
 
   const { data: device } = await supabase
     .from("devices")
@@ -131,6 +157,12 @@ export default async function DeviceDetailPage({
             </p>
           ) : (
             <>
+              <ExportCsvButton
+                deviceId={device.id}
+                remaining={exportsRemaining}
+                max={maxExports}
+                nextAvailableLabel={nextExportLabel}
+              />
               <TelemetryChart
                 data={chartData}
                 unit={device.unit}

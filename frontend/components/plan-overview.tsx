@@ -10,6 +10,7 @@ type Plan = {
   name: string;
   max_devices: number;
   max_readings_per_device: number;
+  max_exports_per_day: number;
 };
 
 type DeviceUsage = {
@@ -24,12 +25,14 @@ export function PlanOverview({
   plans,
   devices,
   deviceCount,
+  exportsUsed,
 }: {
   tenantId: string;
   currentPlanId: string;
   plans: Plan[];
   devices: DeviceUsage[];
   deviceCount: number;
+  exportsUsed: number;
 }) {
   const [selecting, setSelecting] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -66,8 +69,9 @@ export function PlanOverview({
         </Link>
         <h1 className="mt-2 text-2xl font-semibold text-panel-ink">Tu plan</h1>
         <p className="mt-1 text-sm text-muted2">
-          Cada plan define cuántos dispositivos puedes registrar y cuántas
-          lecturas diarias puede recibir cada uno.
+          Cada plan define cuántos dispositivos puedes registrar, cuántas
+          lecturas diarias puede recibir cada uno y cuántas veces al día puedes
+          exportar lecturas a CSV.
         </p>
       </div>
 
@@ -77,6 +81,10 @@ export function PlanOverview({
           <p className="text-lg font-semibold text-panel-ink">{currentPlan.name}</p>
           <p className="mt-1 text-sm text-muted2">
             {deviceCount} de {currentPlan.max_devices} dispositivos usados
+          </p>
+          <p className="text-sm text-muted2">
+            {Math.min(exportsUsed, currentPlan.max_exports_per_day)} de{" "}
+            {currentPlan.max_exports_per_day} exportaciones usadas hoy
           </p>
         </div>
       )}
@@ -95,6 +103,10 @@ export function PlanOverview({
             <p className="mt-2 text-sm text-muted2">{plan.max_devices} dispositivos</p>
             <p className="text-sm text-muted2">
               {plan.max_readings_per_device} lecturas diarias por dispositivo
+            </p>
+            <p className="text-sm text-muted2">
+              {plan.max_exports_per_day}{" "}
+              {plan.max_exports_per_day === 1 ? "exportación" : "exportaciones"} CSV al día
             </p>
             <Button
               className="mt-4 w-full bg-brand text-brand-foreground hover:bg-brand/90"

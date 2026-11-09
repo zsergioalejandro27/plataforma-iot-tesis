@@ -25,7 +25,7 @@ export default async function PlanPage() {
 
   const { data: plans } = await supabase
     .from("plans")
-    .select("id, name, max_devices, max_readings_per_device")
+    .select("id, name, max_devices, max_readings_per_device, max_exports_per_day")
     .order("max_devices", { ascending: true });
 
   const { data: devices } = await supabase
@@ -34,6 +34,12 @@ export default async function PlanPage() {
     .order("created_at", { ascending: true });
 
   const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+  // Exportaciones de la organización en las últimas 24 h (RLS: solo las propias).
+  const { count: exportsUsed } = await supabase
+    .from("exports")
+    .select("*", { count: "exact", head: true })
+    .gte("created_at", oneDayAgo);
 
   const devicesWithUsage = await Promise.all(
     (devices ?? []).map(async (device) => {
@@ -54,6 +60,7 @@ export default async function PlanPage() {
       plans={plans ?? []}
       devices={devicesWithUsage}
       deviceCount={devices?.length ?? 0}
+      exportsUsed={exportsUsed ?? 0}
     />
   );
 }
