@@ -77,9 +77,13 @@ py simulator/publish_test.py device-001   # una lectura de prueba (Windows)
 
 ## Pendientes conocidos
 
+Estado: el prototipo está terminado y subido; lo que queda es validar y documentar. La entrega final es del 9 al 13 de noviembre de 2026. Confirmar con el autor cuáles de estos ya hizo:
+
 - Probar el sketch de ESP32 (`.ino`) en Wokwi y anotar el resultado; está generado y revisado a ojo, no probado en hardware.
-- Cambiar el nombre en las plantillas de correo de Supabase Auth (Authentication → Emails) junto con el dominio y el SMTP propios.
-- Validación formal (pruebas funcionales con prueba real de aislamiento entre dos tenants, rendimiento con latencia medida, usabilidad con usuarios reales) y su documentación.
-- Decidir cómo darle a un cliente externo un script de simulación sin compartir la credencial maestra de HiveMQ (HiveMQ Cloud permite credenciales con permiso por topic).
-- Dominio propio y SMTP personalizado para los correos de Auth.
-- Revisión de responsividad móvil de las pantallas posteriores a la landing.
+- Validación formal del objetivo 4: mediciones de latencia y rendimiento (indicador del anteproyecto: menos de 2 s) y pruebas de usabilidad con usuarios reales; el aislamiento entre dos tenants ya se verificó con dos cuentas.
+- Actualizar el informe de avance (Claude Doc `PGII_AVANCE60_Amaya_Corzo`) con la puerta HTTP, Semita, la personalización, las 46 pruebas y el cronograma.
+- Dominio propio y SMTP personalizado para los correos de Auth, y cambiar el nombre en sus plantillas (Authentication → Emails en Supabase).
+- Decidir con el director si los scripts descargables traen una zona editable para que el estudiante programe sus propios valores.
+- Antes de la sustentación: bajar `PUBLISH_INTERVAL_SECONDS` en AWS y ajustar `CLOUD_SIM_EVERY` (ver memoria del proyecto); revertir después.
+
+Ya resuelto: credenciales para clientes externos (puerta HTTP con token por dispositivo) y responsividad móvil.
