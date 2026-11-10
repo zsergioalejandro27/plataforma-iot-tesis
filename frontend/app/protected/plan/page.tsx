@@ -13,7 +13,7 @@ export default async function PlanPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("tenants(id, name, plan_id)")
+    .select("tenants(id, name, plan_id, plan_selected)")
     .eq("id", userId)
     .single();
 
@@ -21,6 +21,7 @@ export default async function PlanPage() {
     id?: string;
     name?: string;
     plan_id?: string;
+    plan_selected?: boolean;
   } | null;
 
   const { data: plans } = await supabase
@@ -57,6 +58,7 @@ export default async function PlanPage() {
     <PlanOverview
       tenantId={tenant?.id ?? ""}
       currentPlanId={tenant?.plan_id ?? "basico"}
+      planSelected={tenant?.plan_selected !== false}
       plans={plans ?? []}
       devices={devicesWithUsage}
       deviceCount={devices?.length ?? 0}

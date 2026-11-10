@@ -22,6 +22,7 @@ type DeviceUsage = {
 export function PlanOverview({
   tenantId,
   currentPlanId,
+  planSelected,
   plans,
   devices,
   deviceCount,
@@ -29,6 +30,10 @@ export function PlanOverview({
 }: {
   tenantId: string;
   currentPlanId: string;
+  // false = cuenta recién creada que aún no ha elegido plan. La base de datos
+  // ya le asigna "basico" por defecto, así que no se puede tratar ese plan como
+  // "actual" (su botón quedaría desactivado y el proxy no la deja salir de aquí).
+  planSelected: boolean;
   plans: Plan[];
   devices: DeviceUsage[];
   deviceCount: number;
@@ -37,7 +42,10 @@ export function PlanOverview({
   const [selecting, setSelecting] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const currentPlan = plans.find((p) => p.id === currentPlanId);
+  const currentPlan = planSelected
+    ? plans.find((p) => p.id === currentPlanId)
+    : undefined;
+  const isCurrent = (planId: string) => planSelected && planId === currentPlanId;
 
   const handleSelect = async (planId: string) => {
     setSelecting(planId);
@@ -64,10 +72,14 @@ export function PlanOverview({
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <Link href="/protected" className="text-sm text-muted2 hover:text-panel-ink">
-          ← Volver
-        </Link>
-        <h1 className="mt-2 text-2xl font-semibold text-panel-ink">Tu plan</h1>
+        {planSelected && (
+          <Link href="/protected" className="text-sm text-muted2 hover:text-panel-ink">
+            ← Volver
+          </Link>
+        )}
+        <h1 className="mt-2 text-2xl font-semibold text-panel-ink">
+          {planSelected ? "Tu plan" : "Elige tu plan para empezar"}
+        </h1>
         <p className="mt-1 text-sm text-muted2">
           Cada plan define cuántos dispositivos puedes registrar, cuántas
           lecturas diarias puede recibir cada uno y cuántas veces al día puedes
@@ -94,7 +106,7 @@ export function PlanOverview({
           <div
             key={plan.id}
             className={`rounded-lg border p-4 ${
-              plan.id === currentPlanId
+              isCurrent(plan.id)
                 ? "border-brand bg-brand/5"
                 : "border-line bg-white"
             }`}
@@ -110,10 +122,10 @@ export function PlanOverview({
             </p>
             <Button
               className="mt-4 w-full bg-brand text-brand-foreground hover:bg-brand/90"
-              disabled={plan.id === currentPlanId || selecting !== null}
+              disabled={isCurrent(plan.id) || selecting !== null}
               onClick={() => handleSelect(plan.id)}
             >
-              {plan.id === currentPlanId
+              {isCurrent(plan.id)
                 ? "Plan actual"
                 : selecting === plan.id
                   ? "Cambiando..."
