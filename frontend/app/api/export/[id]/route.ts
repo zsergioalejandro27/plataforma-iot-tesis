@@ -20,12 +20,18 @@ function json(status: number, body: Record<string, unknown>) {
   return NextResponse.json(body, { status });
 }
 
-// Encierra un texto entre comillas si trae comas, comillas o saltos de línea.
-// Además, si empieza por = + - @, Excel lo tomaría como fórmula: se le antepone
-// un apóstrofo para que se vea como texto (solo en columnas de texto).
+// Formato del CSV: el del Excel en español (Colombia), que es como lo abren los
+// usuarios con doble clic. Ese Excel espera ";" entre columnas y la coma como
+// separador decimal; con "," todo quedaba en la columna A y "26.4" podía leerse
+// como fecha. Google Sheets detecta el ";" solo.
+const SEP = ";";
+
+// Encierra un texto entre comillas si trae el separador, comillas o saltos de
+// línea. Además, si empieza por = + - @, Excel lo tomaría como fórmula: se le
+// antepone un apóstrofo para que se vea como texto (solo en columnas de texto).
 function csvText(value: string): string {
   const safe = /^[=+\-@]/.test(value) ? `'${value}` : value;
-  return /[",\r\n]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
+  return /[";,\r\n]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
 }
 
 // "sv-SE" formatea como 2026-11-09 14:05:33, que Excel y Python leen como fecha.
@@ -106,7 +112,7 @@ export async function GET(
   const unit = csvText(device.unit ?? "");
 
   const lines = [
-    "fecha_hora_bogota,fecha_hora_utc,dispositivo,device_key,metrica,valor,unidad",
+    ["fecha_hora_bogota", "fecha_hora_utc", "dispositivo", "device_key", "metrica", "valor", "unidad"].join(SEP),
     ...rows.map((row) => {
       const date = new Date(row.recorded_at);
       const value = getMetricValue(row.payload, device.metric_key);
@@ -116,9 +122,9 @@ export async function GET(
         name,
         key,
         metric,
-        value === null ? "" : String(value),
+        value === null ? "" : String(value).replace(".", ","), // 26.4 -> 26,4
         unit,
-      ].join(",");
+      ].join(SEP);
     }),
   ];
 
